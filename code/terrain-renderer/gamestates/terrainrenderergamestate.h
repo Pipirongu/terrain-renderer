@@ -16,14 +16,14 @@
 //------------------------------------------------------------------------------
 namespace Tools
 {
-class TerrainRenderGameState : public BaseGameFeature::GameStateHandler
+class TerrainRendererGameState : public BaseGameFeature::GameStateHandler
 {
-	__DeclareClass(TerrainRenderGameState);
+	__DeclareClass(TerrainRendererGameState);
 public:
 	/// constructor
-	TerrainRenderGameState();
+	TerrainRendererGameState();
 	/// destructor
-	virtual ~TerrainRenderGameState();
+	virtual ~TerrainRendererGameState();
 
 	/// called when the state represented by this state handler is entered
 	virtual void OnStateEnter(const Util::String& prevState);

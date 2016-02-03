@@ -3,7 +3,7 @@
 //  (C) 2013-2015 Individual contributors, see AUTHORS file
 //------------------------------------------------------------------------------
 #include "stdneb.h"
-#include "terrainrendergamestate.h"
+#include "terrainrenderergamestate.h"
 #include "math/vector.h"
 #include "math/matrix44.h"
 #include "graphicsfeatureunit.h"
@@ -18,11 +18,11 @@
 #include "scriptingfeature/properties/scriptingproperty.h"
 #include "scriptingfeature/scriptingprotocol.h"
 #include "effects/effectsfeatureunit.h"
-#include "terrainrender/terrainrenderapplication.h"
+#include "terrain-renderer/terrainrendererapplication.h"
 
 namespace Tools
 {
-	__ImplementClass(Tools::TerrainRenderGameState, 'TRGS', BaseGameFeature::GameStateHandler);
+	__ImplementClass(Tools::TerrainRendererGameState, 'TRGS', BaseGameFeature::GameStateHandler);
 
 using namespace BaseGameFeature;
 using namespace GraphicsFeature;
@@ -32,7 +32,7 @@ using namespace Math;
 //------------------------------------------------------------------------------
 /**
 */
-TerrainRenderGameState::TerrainRenderGameState()
+TerrainRendererGameState::TerrainRendererGameState()
 {
 	// empty
 }
@@ -40,7 +40,7 @@ TerrainRenderGameState::TerrainRenderGameState()
 //------------------------------------------------------------------------------
 /**
 */
-TerrainRenderGameState::~TerrainRenderGameState()
+TerrainRendererGameState::~TerrainRendererGameState()
 {
 	// empty
 }
@@ -49,7 +49,7 @@ TerrainRenderGameState::~TerrainRenderGameState()
 /**
 */
 void 
-TerrainRenderGameState::OnStateEnter(const Util::String& prevState)
+TerrainRendererGameState::OnStateEnter(const Util::String& prevState)
 {
 	GameStateHandler::OnStateEnter(prevState);	
 
@@ -62,7 +62,7 @@ TerrainRenderGameState::OnStateEnter(const Util::String& prevState)
 /**
 */
 void 
-TerrainRenderGameState::OnStateLeave(const Util::String& nextState)
+TerrainRendererGameState::OnStateLeave(const Util::String& nextState)
 {
 	GameStateHandler::OnStateLeave(nextState);
 }
@@ -71,7 +71,7 @@ TerrainRenderGameState::OnStateLeave(const Util::String& nextState)
 /**
 */
 Util::String 
-TerrainRenderGameState::OnFrame()
+TerrainRendererGameState::OnFrame()
 {
 	//handle all user input
 	if (Input::InputServer::HasInstance())
@@ -86,7 +86,7 @@ TerrainRenderGameState::OnFrame()
 /**
 */
 void 
-TerrainRenderGameState::OnLoadBefore()
+TerrainRendererGameState::OnLoadBefore()
 {
 	
 }
@@ -95,7 +95,7 @@ TerrainRenderGameState::OnLoadBefore()
 /**
 */
 void 
-TerrainRenderGameState::OnLoadAfter()
+TerrainRendererGameState::OnLoadAfter()
 {
 
 }
@@ -104,7 +104,7 @@ TerrainRenderGameState::OnLoadAfter()
 /**
 */
 void 
-TerrainRenderGameState::HandleInput()
+TerrainRendererGameState::HandleInput()
 {
 	const Ptr<Input::Keyboard>& kbd = Input::InputServer::Instance()->GetDefaultKeyboard();
 
@@ -117,7 +117,7 @@ TerrainRenderGameState::HandleInput()
 	}
 	if(kbd->KeyDown(Input::Key::X))
 	{
-		TerrainRenderApplication::Instance()->RequestState("Exit");
+		TerrainRendererApplication::Instance()->RequestState("Exit");
 	}
 	if (kbd->KeyDown(Input::Key::F2))
 	{

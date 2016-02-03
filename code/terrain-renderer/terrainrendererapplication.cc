@@ -9,12 +9,12 @@
 #include "input/gamepad.h"
 #include "managers/factorymanager.h"
 #include "managers/entitymanager.h"
-#include "gamestates/terrainrendergamestate.h"
+#include "gamestates/terrainrenderergamestate.h"
 #include "physicsfeature/physicsprotocol.h"
 #include "graphicsfeature/graphicsfeatureprotocol.h"
 #include "basegamefeature/basegameprotocol.h"
 #include "scriptingfeature/scriptingcommands.h"
-#include "terrainrenderapplication.h"
+#include "terrainrendererapplication.h"
 #include "coregraphics/displaymode.h"
 #include "uicommands.h"
 
@@ -30,7 +30,7 @@ using namespace Game;
 //------------------------------------------------------------------------------
 /**
 */
-TerrainRenderApplication::TerrainRenderApplication(void)
+TerrainRendererApplication::TerrainRendererApplication(void)
 {
 	// empty
 }
@@ -38,7 +38,7 @@ TerrainRenderApplication::TerrainRenderApplication(void)
 //------------------------------------------------------------------------------
 /**
 */
-TerrainRenderApplication::~TerrainRenderApplication(void)
+TerrainRendererApplication::~TerrainRendererApplication(void)
 {
 	if (this->IsOpen())
 	{
@@ -49,7 +49,7 @@ TerrainRenderApplication::~TerrainRenderApplication(void)
 //------------------------------------------------------------------------------
 /**
 */
-bool TerrainRenderApplication::Open()
+bool TerrainRendererApplication::Open()
 {
 	n_assert(!this->IsOpen());
 	if (GameApplication::Open())
@@ -62,7 +62,7 @@ bool TerrainRenderApplication::Open()
 //------------------------------------------------------------------------------
 /**
 */
-void TerrainRenderApplication::Close()
+void TerrainRendererApplication::Close()
 {
 	GameApplication::Close();
 }
@@ -72,10 +72,10 @@ void TerrainRenderApplication::Close()
 /**
 */
 void 
-TerrainRenderApplication::SetupStateHandlers()
+TerrainRendererApplication::SetupStateHandlers()
 {
-	Ptr<TerrainRenderGameState> gameState = TerrainRenderGameState::Create();
-	gameState->SetSetupMode(TerrainRenderGameState::NewGame);
+	Ptr<TerrainRendererGameState> gameState = TerrainRendererGameState::Create();
+	gameState->SetSetupMode(TerrainRendererGameState::NewGame);
 	gameState->SetName("DemoState");
 	// select the level to be loaded explicitly instead of the default one
 	gameState->SetLevelName("demo_full");
@@ -91,7 +91,7 @@ TerrainRenderApplication::SetupStateHandlers()
 /**
 */
 void 
-TerrainRenderApplication::SetupGameFeatures()
+TerrainRendererApplication::SetupGameFeatures()
 {
 	GameApplication::SetupGameFeatures();
 
@@ -173,7 +173,7 @@ TerrainRenderApplication::SetupGameFeatures()
 /**
 */
 void 
-TerrainRenderApplication::CleanupGameFeatures()
+TerrainRendererApplication::CleanupGameFeatures()
 {
 	this->mainLayout = 0;	
 	this->gameServer->RemoveGameFeature(this->postEffectFeature.upcast<Game::FeatureUnit>());

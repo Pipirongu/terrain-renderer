@@ -1,17 +1,17 @@
 #-------------------------------------------------------------------------------
-# terrainproject
+# terrainrenderer
 #-------------------------------------------------------------------------------
 
 # glob the source files and add them to folders in visual studio
 FILE(GLOB SRC "gamestates/*.cc")
 FILE(GLOB HEAD "gamestates/*.h")
 LIST(APPEND SRCSGAMESTATES ${SRC} ${HEAD})
-SOURCE_GROUP("terrainproject\\gamestates" FILES ${SRCSGAMESTATES})
+SOURCE_GROUP("terrain-renderer\\gamestates" FILES ${SRCSGAMESTATES})
 
 FILE(GLOB SRC "*.cc")
 FILE(GLOB HEAD "*.h")
 LIST(APPEND SRCSBASE ${SRC} ${HEAD})
-SOURCE_GROUP("terrainproject" FILES ${SRCSBASE})
+SOURCE_GROUP("terrain-renderer" FILES ${SRCSBASE})
 
 # define precompiled headers
 SET(PCH_files	
@@ -21,19 +21,19 @@ SOURCE_GROUP("Precompiled" FILES ${PCH_files})
 
 LIST(APPEND ALLSRCS ${SRCSBASE} ${SRCSGAMESTATES} ${PCH_files})
 
-ADD_EXECUTABLE(terrainproject ${ALLSRCS})
-SET_TARGET_PROPERTIES(terrainproject PROPERTIES FOLDER "terrainproject")
+ADD_EXECUTABLE(terrain-renderer ${ALLSRCS})
+SET_TARGET_PROPERTIES(terrain-renderer PROPERTIES FOLDER "terrain-renderer")
 
 # link to application project, will pull in all dependencies and includes required
-TARGET_LINK_LIBRARIES(terrainproject application)
-ADD_DEPENDENCIES(terrainproject application)
+TARGET_LINK_LIBRARIES(terrain-renderer application)
+ADD_DEPENDENCIES(terrain-renderer application)
 
 # apply default compiler settings, has to be done to be consistent throughout
 N_SET_COMPILER_DEFAULTS()
-N_SET_EXE_LINKER_DEFAULTS(terrainproject)
-N_SET_EXE_SUBSYSTEM(terrainproject Windows)
+N_SET_EXE_LINKER_DEFAULTS(terrain-renderer)
+N_SET_EXE_SUBSYSTEM(terrain-renderer Windows)
 
 # setup precompiled headers if chosen at project level
 IF(N_USE_PRECOMPILED_HEADERS)
-	N_SET_PCH(terrainproject  stdneb.h stdneb.cc ../)
+	N_SET_PCH(terrain-renderer  stdneb.h stdneb.cc ../)
 ENDIF()

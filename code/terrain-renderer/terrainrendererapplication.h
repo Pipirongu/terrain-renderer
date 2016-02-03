@@ -23,13 +23,13 @@
 */
 namespace  Tools
 {
-class TerrainRenderApplication : public App::GameApplication
+class TerrainRendererApplication : public App::GameApplication
 {
 public:
 	/// constructor
-	TerrainRenderApplication(void);
+	TerrainRendererApplication(void);
 	/// destructor
-	virtual ~TerrainRenderApplication(void);
+	virtual ~TerrainRendererApplication(void);
 	/// open application
 	virtual bool Open();
 	/// close application
