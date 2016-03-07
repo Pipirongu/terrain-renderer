@@ -53,9 +53,18 @@ TerrainRendererGameState::OnStateEnter(const Util::String& prevState)
 {
 	GameStateHandler::OnStateEnter(prevState);	
 
+	this->stage = GraphicsFeature::GraphicsFeatureUnit::Instance()->GetDefaultStage();
+
 	const Ptr<UI::UiLayout>& layout = UI::UiFeatureUnit::Instance()->GetLayout("demo");
 	Ptr<UI::UiElement> element = layout->GetElement("updatetext");
 	element->SetText("Entered state");
+
+	//////////////////////////////////////////////////////////////////////////
+	//setup terrainaddon
+	//this->terrain_renderer_addon = Terrain::TerrainRenderer::Create();
+	//this->terrain_entity = this->terrain_renderer_addon->CreateEntity();
+	//this->stage->AttachEntity(this->terrain_entity.cast<Graphics::GraphicsEntity>());
+	//this->terrain_renderer_addon->Setup(this->terrain_entity);
 }
 
 //------------------------------------------------------------------------------

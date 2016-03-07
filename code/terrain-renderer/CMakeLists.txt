@@ -8,6 +8,11 @@ FILE(GLOB HEAD "gamestates/*.h")
 LIST(APPEND SRCSGAMESTATES ${SRC} ${HEAD})
 SOURCE_GROUP("terrain-renderer\\gamestates" FILES ${SRCSGAMESTATES})
 
+FILE(GLOB SRC "terrainentity/*.cc")
+FILE(GLOB HEAD "terrainentity/*.h")
+LIST(APPEND SRCTERRAINENTITY ${SRC} ${HEAD})
+SOURCE_GROUP("terrain-renderer\\terrainentity" FILES ${SRCTERRAINENTITY})
+
 FILE(GLOB SRC "*.cc")
 FILE(GLOB HEAD "*.h")
 LIST(APPEND SRCSBASE ${SRC} ${HEAD})
@@ -19,7 +24,7 @@ SET(PCH_files
 )
 SOURCE_GROUP("Precompiled" FILES ${PCH_files})
 
-LIST(APPEND ALLSRCS ${SRCSBASE} ${SRCSGAMESTATES} ${PCH_files})
+LIST(APPEND ALLSRCS ${SRCSBASE} ${SRCSGAMESTATES} ${SRCTERRAINENTITY} ${PCH_files})
 
 ADD_EXECUTABLE(terrain-renderer ${ALLSRCS})
 SET_TARGET_PROPERTIES(terrain-renderer PROPERTIES FOLDER "terrain-renderer")
