@@ -13,6 +13,12 @@
 #include "coregraphics/vertexbuffer.h"
 #include "coregraphics/vertexlayout.h"
 #include "coregraphics/primitivegroup.h"
+
+#include "terrainnode.h"
+#include "block.h"
+
+using namespace Math;
+
 namespace Terrain
 {
 class TerrainNodeInstance : public Models::StateNodeInstance
@@ -29,6 +35,7 @@ public:
 	/// called when we render the billboard node
 	virtual void Render();
 	
+	void update_level_offsets(const float2& camera_pos);
 
 protected:
 	/// called when the node sets up
@@ -36,9 +43,61 @@ protected:
 	/// called when removed
 	virtual void Discard();
 
-	Ptr<CoreGraphics::VertexBuffer> vb;
-	Ptr<CoreGraphics::IndexBuffer> ib;
-	CoreGraphics::PrimitiveGroup primGroup;
+	//Ptr<CoreGraphics::VertexBuffer> vb;
+	//Ptr<CoreGraphics::IndexBuffer> ib;
+	//CoreGraphics::PrimitiveGroup primGroup;
+
+	Ptr<TerrainNode> terrain_node;
+
+	// a float consumes N unit and alignment is 4N
+	struct InstanceData
+	{
+		float2 offset; // Offset of the block in XZ plane (world space). This is prescaled.
+		float scale; // Scale factor of local offsets (vertex coordinates).
+		float level; // Clipmap LOD level of block.
+		//float2 debug_color;
+		//float padding; //padding for debug_color
+	};
+
+	//update the instanced draw list structure
+	//render the instanced draw list structure
+	void update_draw_list();
+	void render_draw_list();
+
+	struct DrawInfo
+	{
+		size_t index_buffer_offset;
+		size_t uniform_buffer_offset;
+		unsigned int indices;
+		unsigned int instances;
+	};
+	Util::Array<DrawInfo> draw_list;
+
+	GLint uniform_buffer_align;
+
+	Util::Array<float2> level_offsets;
+
+	typedef bool(*TrimConditional)(const float2& offset);
+
+	//GLsync syncObj;
+	InstanceData* data;
+
+	float2 get_offset_level(const float2& camera_pos, unsigned int level); //snapping grid
+	void update_draw_list(DrawInfo& info, size_t& ubo_offset);
+	DrawInfo get_draw_info_blocks(InstanceData *instance_data);
+	DrawInfo get_draw_info_vert_fixup(InstanceData *instance_data);
+	DrawInfo get_draw_info_horiz_fixup(InstanceData *instance_data);
+	DrawInfo get_draw_info_degenerate(InstanceData *instance_data, const Block& block, const float2& offset, const float2& ring_offset);
+	DrawInfo get_draw_info_degenerate_left(InstanceData *instance_data);
+	DrawInfo get_draw_info_degenerate_right(InstanceData *instance_data);
+	DrawInfo get_draw_info_degenerate_top(InstanceData *instance_data);
+	DrawInfo get_draw_info_degenerate_bottom(InstanceData *instance_data);
+	DrawInfo get_draw_info_trim_full(InstanceData *instance_data);
+	DrawInfo get_draw_info_trim(InstanceData *instance_data, const Block& block, TrimConditional cond);
+	DrawInfo get_draw_info_trim_top_right(InstanceData *instance_data);
+	DrawInfo get_draw_info_trim_top_left(InstanceData *instance_data);
+	DrawInfo get_draw_info_trim_bottom_right(InstanceData *instance_data);
+	DrawInfo get_draw_info_trim_bottom_left(InstanceData *instance_data);
 }; 
 } // namespace Models
 //------------------------------------------------------------------------------

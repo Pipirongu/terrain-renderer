@@ -71,7 +71,7 @@ TerrainEntity::OnActivate()
 	this->terrain_node->SetSurfaceName("sur:system/billboard");
 	this->terrain_node->SetName("root");
 	this->terrain_node->SetClipmapData(64, 10, 1.f);
-	this->terrain_node->LoadResources(true);
+	//this->terrain_node->LoadResources(true);
 	this->terrain_model->AttachNode(this->terrain_node.upcast<ModelNode>());
 	
 	// create model instance
@@ -137,10 +137,10 @@ TerrainEntity::OnDeactivate()
 void
 TerrainEntity::OnHide()
 {
-	if (this->modelInstance.isvalid())
-	{
-		this->modelInstance->OnHide(this->entityTime);
-	}
+	//if (this->modelInstance.isvalid())
+	//{
+	//	this->modelInstance->OnHide(this->entityTime);
+	//}
 	GraphicsEntity::OnHide();
 }
 
@@ -150,10 +150,10 @@ TerrainEntity::OnHide()
 void
 TerrainEntity::OnShow()
 {
-	if (this->modelInstance.isvalid())
-	{
-		this->modelInstance->OnShow(this->entityTime);
-	}
+	//if (this->modelInstance.isvalid())
+	//{
+	//	this->modelInstance->OnShow(this->entityTime);
+	//}
 	GraphicsEntity::OnShow();
 }
 
