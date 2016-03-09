@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Level>
+    <NebulaLevel Version="2" name="terrainlevel" id="terrainlevel">
+        <Layers>
+            <Layer name="Default" autoload="true" visible="true" locked="false" />
+        </Layers>
+        <Entities />
+        <Global WorldCenter="0.000000,0.000000,0.000000,1.000000" WorldExtents="20.000000,20.000000,20.000000,0.000000" PostEffectPreset="Default" _Layers="Default" GlobalLightTransform="-0.270318, -0.644360, 0.715351, 0.000000, 0.875152, -0.474150, -0.096391, 0.000000, 0.401295, 0.599985, 0.692085, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000" />
+    </NebulaLevel>
+</Level>

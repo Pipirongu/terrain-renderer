@@ -1,11 +1,11 @@
 #pragma once
 //------------------------------------------------------------------------------
 /**
-    @class Models::BillboardNodeInstance
-    
-    A billboard node instance is represented as an individual renderable instance.
-    
-    (C) 2013-2015 Individual contributors, see AUTHORS file
+@class Models::BillboardNodeInstance
+
+A billboard node instance is represented as an individual renderable instance.
+
+(C) 2013-2015 Individual contributors, see AUTHORS file
 */
 //------------------------------------------------------------------------------
 #include "models/nodes/statenodeinstance.h"
@@ -34,7 +34,7 @@ public:
 	virtual void OnVisibilityResolve(IndexT resolveIndex, float distToViewer);
 	/// called when we render the billboard node
 	virtual void Render();
-	
+
 	void update_level_offsets(const float2& camera_pos);
 
 protected:
@@ -47,7 +47,10 @@ protected:
 	//Ptr<CoreGraphics::IndexBuffer> ib;
 	//CoreGraphics::PrimitiveGroup primGroup;
 
+	Ptr<CoreGraphics::ConstantBuffer> uniform_buffer;
 	Ptr<TerrainNode> terrain_node;
+
+	void SetupUniformBuffer();
 
 	// a float consumes N unit and alignment is 4N
 	struct InstanceData
@@ -73,6 +76,7 @@ protected:
 	};
 	Util::Array<DrawInfo> draw_list;
 
+	size_t uniform_buffer_size;
 	GLint uniform_buffer_align;
 
 	Util::Array<float2> level_offsets;
@@ -98,6 +102,6 @@ protected:
 	DrawInfo get_draw_info_trim_top_left(InstanceData *instance_data);
 	DrawInfo get_draw_info_trim_bottom_right(InstanceData *instance_data);
 	DrawInfo get_draw_info_trim_bottom_left(InstanceData *instance_data);
-}; 
+};
 } // namespace Models
 //------------------------------------------------------------------------------

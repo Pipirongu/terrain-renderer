@@ -48,19 +48,19 @@ TerrainNodeInstance::~TerrainNodeInstance()
 void
 TerrainNodeInstance::OnVisibilityResolve(IndexT resolveIndex, float distToViewer)
 {
-	//// check if node is inside lod distances or if no lod is used
-	//const Ptr<TransformNode>& transformNode = this->modelNode.downcast<TransformNode>();
-	//if (transformNode->CheckLodDistance(distToViewer))
-	//{
- //       this->modelNode->AddVisibleNodeInstance(resolveIndex, this->surfaceInstance->GetCode(), this);
-	//	ModelNodeInstance::OnVisibilityResolve(resolveIndex, distToViewer);
-	//}
-}
+		//// check if node is inside lod distances or if no lod is used
+		//const Ptr<TransformNode>& transformNode = this->modelNode.downcast<TransformNode>();
+		//if (transformNode->CheckLodDistance(distToViewer))
+		//{
+		//       this->modelNode->AddVisibleNodeInstance(resolveIndex, this->surfaceInstance->GetCode(), this);
+		//	ModelNodeInstance::OnVisibilityResolve(resolveIndex, distToViewer);
+		//}
+	}
 
 //------------------------------------------------------------------------------
 /**
 */
-void 
+void
 TerrainNodeInstance::Setup(const Ptr<ModelInstance>& inst, const Ptr<ModelNode>& node, const Ptr<ModelNodeInstance>& parentNodeInst)
 {
 	Ptr<TerrainNode> terrain_node = this->modelNode.downcast<TerrainNode>();
@@ -115,7 +115,7 @@ TerrainNodeInstance::Setup(const Ptr<ModelInstance>& inst, const Ptr<ModelNode>&
 //------------------------------------------------------------------------------
 /**
 */
-void 
+void
 TerrainNodeInstance::Discard()
 {
 	//n_assert(this->vb->IsLoaded());
@@ -132,7 +132,7 @@ TerrainNodeInstance::Discard()
 //------------------------------------------------------------------------------
 /**
 */
-void 
+void
 TerrainNodeInstance::Render()
 {
 	StateNodeInstance::Render();
@@ -156,6 +156,17 @@ TerrainNodeInstance::Render()
 
 	//// draw geometry
 	//renderDevice->Draw();
+}
+//------------------------------------------------------------------------------
+/**
+*/
+void
+TerrainNodeInstance::SetupUniformBuffer()
+{
+	this->uniform_buffer = CoreGraphics::ConstantBuffer::Create();
+	this->uniform_buffer_size = 2 * (12 + 4 + 1 + 4) * terrain_node->levels * sizeof(InstanceData);
+	this->uniform_buffer->SetSize(this->uniform_buffer_size);
+	this->uniform_buffer->Setup(1);
 }
 
 //! [Snapping clipmap level to a grid]
@@ -185,7 +196,7 @@ float2 TerrainNodeInstance::get_offset_level(const float2& camera_pos, unsigned 
 		// rounds the value downwards to an integer that is not larger than the original
 		vec_floor.x() = floor(vec_floor.x());
 		vec_floor.y() = floor(vec_floor.y());
-	
+
 		// Snap to grid of next level. I.e. we move the clipmap level in steps of two. bitwise multi
 		float2 snapped_pos = float2::multiply(vec_floor, float2(1 << (level + 1), 1 << (level + 1)));
 
