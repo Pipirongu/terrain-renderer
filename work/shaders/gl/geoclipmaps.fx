@@ -18,7 +18,7 @@ struct PerInstanceData
 	//vec3 debug_color;
 };
 
-shared varblock InstanceData // Use std140 packing rules for uniform block. set binding point to 0
+shared varblock InstanceData[bool System = true;] // Use std140 packing rules for uniform block. set binding point to 0
 {
 	PerInstanceData instance[256];
 };

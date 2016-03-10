@@ -82,13 +82,13 @@ TerrainEntity::OnActivate()
 	// get node instance and set the view space aligned flag
 	Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
 
-    // setup material
-    const Ptr<SurfaceInstance>& surface = nodeInstance->GetSurfaceInstance();
-    this->textureVariable = surface->GetConstant("AlbedoMap");
-    this->colorVariable = surface->GetConstant("Color");
+ //   // setup material
+ //   const Ptr<SurfaceInstance>& surface = nodeInstance->GetSurfaceInstance();
+ //   this->textureVariable = surface->GetConstant("AlbedoMap");
+ //   this->colorVariable = surface->GetConstant("Color");
 
-	// create a variable instance and set the texture
-	this->textureVariable->SetTexture(this->texture->GetTexture());
+	//// create a variable instance and set the texture
+	//this->textureVariable->SetTexture(this->texture->GetTexture());
 	nodeInstance->SetInViewSpace(this->viewAligned);
 
 	// set to be valid
@@ -101,31 +101,31 @@ TerrainEntity::OnActivate()
 void 
 TerrainEntity::OnDeactivate()
 {
-	n_assert(this->IsActive());
-	n_assert(this->texture.isvalid());
-	n_assert(this->modelInstance.isvalid());
-	n_assert(this->textureVariable.isvalid());
+	//n_assert(this->IsActive());
+	//n_assert(this->texture.isvalid());
+	//n_assert(this->modelInstance.isvalid());
+	//n_assert(this->textureVariable.isvalid());
 
-	// cleanup resources
-	ResourceManager* resManager = ResourceManager::Instance();
-	resManager->DiscardManagedResource(this->texture.upcast<ManagedResource>());
+	//// cleanup resources
+	//ResourceManager* resManager = ResourceManager::Instance();
+	//resManager->DiscardManagedResource(this->texture.upcast<ManagedResource>());
 
-	// discard model instance
-	this->modelInstance->GetModel()->DiscardInstance(this->modelInstance);
-	this->modelInstance = 0;	
+	//// discard model instance
+	//this->modelInstance->GetModel()->DiscardInstance(this->modelInstance);
+	//this->modelInstance = 0;	
 
-	// discard texture variable
-    this->textureVariable = 0;
-    this->colorVariable = 0;
+	//// discard texture variable
+ //   this->textureVariable = 0;
+ //   this->colorVariable = 0;
 
-	// kill model if this is our last billboard entity
-	if (this->terrain_model->GetInstances().Size() == 0)
-	{
-		this->terrain_node->UnloadResources();
-		this->terrain_node = 0;
-		this->terrain_model->Unload();
-		this->terrain_model = 0;
-	}
+	//// kill model if this is our last billboard entity
+	//if (this->terrain_model->GetInstances().Size() == 0)
+	//{
+	//	this->terrain_node->UnloadResources();
+	//	this->terrain_node = 0;
+	//	this->terrain_model->Unload();
+	//	this->terrain_model = 0;
+	//}
 
 	// up to parent class
 	GraphicsEntity::OnDeactivate();
@@ -164,7 +164,7 @@ void
 TerrainEntity::OnResolveVisibility(IndexT frameIndex, bool updateLod)
 {
 	n_assert(this->modelInstance.isvalid());
-	VisResolver::Instance()->AttachVisibleModelInstancePlayerCamera(frameIndex, this->modelInstance, updateLod);
+	//VisResolver::Instance()->AttachVisibleModelInstancePlayerCamera(frameIndex, this->modelInstance, updateLod);
 }
 
 //------------------------------------------------------------------------------
@@ -242,7 +242,7 @@ TerrainEntity::OnRenderBefore(IndexT frameIndex)
 void
 TerrainEntity::HandleMessage(const Ptr<Message>& msg)
 {
-    __Dispatch(TerrainEntity, this, msg);
+   //__Dispatch(TerrainEntity, this, msg);
 }
 
 } // namespace Graphics

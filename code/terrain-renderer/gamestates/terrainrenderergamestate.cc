@@ -53,7 +53,7 @@ TerrainRendererGameState::OnStateEnter(const Util::String& prevState)
 {
 	GameStateHandler::OnStateEnter(prevState);	
 
-	this->stage = GraphicsFeature::GraphicsFeatureUnit::Instance()->GetDefaultStage();
+	//this->stage = GraphicsFeature::GraphicsFeatureUnit::Instance()->GetDefaultStage();
 
 	const Ptr<UI::UiLayout>& layout = UI::UiFeatureUnit::Instance()->GetLayout("demo");
 	Ptr<UI::UiElement> element = layout->GetElement("updatetext");

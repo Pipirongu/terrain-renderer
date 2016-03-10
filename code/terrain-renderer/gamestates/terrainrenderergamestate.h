@@ -13,8 +13,6 @@
 #include "graphics/pointlightentity.h"
 #include "game/entity.h"
 
-#include "terrainrenderer/terrainrenderer.h"
-
 //------------------------------------------------------------------------------
 namespace Tools
 {

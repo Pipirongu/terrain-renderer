@@ -43,10 +43,6 @@ protected:
 	/// called when removed
 	virtual void Discard();
 
-	//Ptr<CoreGraphics::VertexBuffer> vb;
-	//Ptr<CoreGraphics::IndexBuffer> ib;
-	//CoreGraphics::PrimitiveGroup primGroup;
-
 	Ptr<CoreGraphics::ConstantBuffer> uniform_buffer;
 	Ptr<TerrainNode> terrain_node;
 
@@ -77,18 +73,21 @@ protected:
 	Util::Array<DrawInfo> draw_list;
 
 	size_t uniform_buffer_size;
-	GLint uniform_buffer_align;
+	//GLint uniform_buffer_align;
 
 	Util::Array<float2> level_offsets;
 
 	typedef bool(*TrimConditional)(const float2& offset);
 
 	//GLsync syncObj;
-	InstanceData* data;
+	//InstanceData* data;
+	Util::Array<InstanceData> data;
+	Ptr<CoreGraphics::Shader> geoclipmap_shader;
+	Ptr<CoreGraphics::ShaderVariable> instance_data_blockvar;
 
 	float2 get_offset_level(const float2& camera_pos, unsigned int level); //snapping grid
 	void update_draw_list(DrawInfo& info, size_t& ubo_offset);
-	DrawInfo get_draw_info_blocks(InstanceData *instance_data);
+	DrawInfo get_draw_info_blocks(Util::Array<InstanceData>& instance_data);
 	DrawInfo get_draw_info_vert_fixup(InstanceData *instance_data);
 	DrawInfo get_draw_info_horiz_fixup(InstanceData *instance_data);
 	DrawInfo get_draw_info_degenerate(InstanceData *instance_data, const Block& block, const float2& offset, const float2& ring_offset);
