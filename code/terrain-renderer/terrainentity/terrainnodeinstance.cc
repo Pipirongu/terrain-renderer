@@ -48,8 +48,12 @@ TerrainNodeInstance::~TerrainNodeInstance()
 void
 TerrainNodeInstance::Setup(const Ptr<ModelInstance>& inst, const Ptr<ModelNode>& node, const Ptr<ModelNodeInstance>& parentNodeInst)
 {
-	Ptr<TerrainNode> terrain_node = this->modelNode.downcast<TerrainNode>();
+	// up to parent class
+	StateNodeInstance::Setup(inst, node, parentNodeInst);
+
+	this->terrain_node = this->modelNode.downcast<TerrainNode>();
 	this->geoclipmap_shader = CoreGraphics::ShaderServer::Instance()->GetShader("shd:geoclipmaps");
+	this->SetupUniformBuffer();
 }
 
 //------------------------------------------------------------------------------
@@ -70,8 +74,9 @@ TerrainNodeInstance::Render()
 	StateNodeInstance::Render();
 	RenderDevice* renderDevice = RenderDevice::Instance();
 
+	float2 camera_pos(0.f, 0.f);
 	//get cameras position
-	this->update_level_offsets();
+	this->update_level_offsets(camera_pos);
 	this->update_draw_list();
 
 	//send viewprojection
@@ -95,6 +100,7 @@ TerrainNodeInstance::Render()
 	//// draw geometry
 	//renderDevice->Draw();
 }
+
 //------------------------------------------------------------------------------
 /**
 */
@@ -110,7 +116,7 @@ TerrainNodeInstance::SetupUniformBuffer()
 	//ShaderServer* geoclip_shdserver = ShaderServer::Instance();
 	//const Ptr<Shader>&  geoclip_shdinst = geoclip_shdserver->LoadShader("shd:geoclipmaps.fx");
 
-	this->uniform_buffer->SetupFromBlockInShader(this->geoclipmap_shader, "InstanceData", 3);
+	this->uniform_buffer->SetupFromBlockInShader(this->geoclipmap_shader, "InstanceData", 1);
 	this->offset_shdvar = this->uniform_buffer->GetVariableByName("offset");
 	this->scale_shdvar = this->uniform_buffer->GetVariableByName("scale");
 	this->level_shdvar = this->uniform_buffer->GetVariableByName("level");
@@ -163,7 +169,7 @@ float2 TerrainNodeInstance::get_offset_level(const float2& camera_pos, unsigned 
 
 void TerrainNodeInstance::update_level_offsets(const float2& camera_pos)
 {
-	level_offsets.Reserve(terrain_node->levels);
+	level_offsets.resize(terrain_node->levels);
 	for (int i = 0; i < terrain_node->levels; i++){
 		level_offsets[i] = get_offset_level(camera_pos, i);
 	}
@@ -612,7 +618,7 @@ void TerrainNodeInstance::update_draw_list()
 	//info = get_draw_info_trim_bottom_left(buffer_offset(data, uniform_buffer_offset));
 	//update_draw_list(info, uniform_buffer_offset);
 
-	this->uniform_buffer->CycleBuffers();
+	//this->uniform_buffer->CycleBuffers();
 	//this->uniform_buffer->Update(data, 0, data.Size() * sizeof(InstanceData));
 	this->offset_shdvar->SetFloat2Array(offset_list.Begin(), offset_list.Size());
 	this->scale_shdvar->SetFloatArray(scale_list.Begin(), scale_list.Size());
@@ -639,7 +645,6 @@ void TerrainNodeInstance::render_draw_list()
 
 			renderDevice->SetPrimitiveGroup(primGroup);
 			renderDevice->DrawIndexedInstanced(draw_list[i].instances, draw_list[i].uniform_buffer_offset); //offset the gl_instanceID
-
 			// Bind uniform buffer at same binding point as in shader
 			//glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniform_buffer);
 			//glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniform_buffer, draw_list[i].uniform_buffer_offset, realign_offset(draw_list[i].instances * sizeof(InstanceData), uniform_buffer_align));
@@ -649,4 +654,28 @@ void TerrainNodeInstance::render_draw_list()
 		}
 	}
 }
+
+void TerrainNodeInstance::OnRenderBefore(IndexT frameIndex, Timing::Time time)
+{
+	//StateNodeInstance::Render();
+	RenderDevice* renderDevice = RenderDevice::Instance();
+
+	float2 camera_pos(0.f, 0.f);
+	//get cameras position
+	this->update_level_offsets(camera_pos);
+	this->update_draw_list();
+
+	//send viewprojection
+	//bind vao
+	renderDevice->SetStreamVertexBuffer(0, terrain_node->vbo, 0);
+	renderDevice->SetVertexLayout(terrain_node->vbo->GetVertexLayout());
+	renderDevice->SetIndexBuffer(terrain_node->ibo);
+
+	//bind uniform buffer
+	this->instance_data_blockvar = this->geoclipmap_shader->GetVariableByName("InstanceData");
+	this->instance_data_blockvar->SetBufferHandle(this->uniform_buffer->GetHandle());
+
+	this->render_draw_list();
+}
+
 } // namespace Models

@@ -36,7 +36,7 @@
 					STATIC MATERIALS
   
   -->
-  <Material name="Geoclipmaps" type="static" desc="material for terrain">
+  <Material name="Geoclipmap" type="static" desc="material for terrain">
    <Pass batch="Picking" shader="picking" variation="Static"/>
    <Pass batch="FlatGeometryLit" shader="geoclipmaps" variation="GeoclipmapStatic"/>
  

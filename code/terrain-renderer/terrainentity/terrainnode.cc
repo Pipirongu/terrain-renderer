@@ -114,17 +114,17 @@ void TerrainNode::SetupVertexBuffer(int size)
 	unsigned int degenerate_vertices = 2 * (size - 1) * 5;
 	num_vertices += degenerate_vertices * 2;
 
-	GLubyte *vertices = new GLubyte[2 * num_vertices];
+	float *vertices = new float[2 * num_vertices];
 	//! [Generating vertex buffer]
-	GLubyte *pv = vertices;
+	float *pv = vertices;
 
 	// Block
 	for (int z = 0; z < size; z++)
 	{
 		for (int x = 0; x < size; x++)
 		{
-			pv[0] = x;
-			pv[1] = z;
+			pv[0] = (float)x;
+			pv[1] = (float)z;
 			pv += 2;
 		}
 	}
@@ -135,8 +135,8 @@ void TerrainNode::SetupVertexBuffer(int size)
 	{
 		for (int x = 0; x < 3; x++)
 		{
-			pv[0] = x;
-			pv[1] = z;
+			pv[0] = (float)x;
+			pv[1] = (float)z;
 			pv += 2;
 		}
 	}
@@ -146,8 +146,8 @@ void TerrainNode::SetupVertexBuffer(int size)
 	{
 		for (int x = 0; x < size; x++)
 		{
-			pv[0] = x;
-			pv[1] = z;
+			pv[0] = (float)x;
+			pv[1] = (float)z;
 			pv += 2;
 		}
 	}
@@ -158,8 +158,8 @@ void TerrainNode::SetupVertexBuffer(int size)
 	{
 		for (int x = 0; x < 2 * size + 1; x++)
 		{
-			pv[0] = x;
-			pv[1] = z;
+			pv[0] = (float)x;
+			pv[1] = (float)z;
 			pv += 2;
 		}
 	}
@@ -169,8 +169,8 @@ void TerrainNode::SetupVertexBuffer(int size)
 	{
 		for (int z = 0; z < 2 * size + 1; z++)
 		{
-			pv[0] = x + 2 * size - 1;
-			pv[1] = z;
+			pv[0] = (float)(x + 2 * size - 1);
+			pv[1] = (float)z;
 			pv += 2;
 		}
 	}
@@ -180,8 +180,8 @@ void TerrainNode::SetupVertexBuffer(int size)
 	{
 		for (int x = 0; x < 2 * size + 1; x++)
 		{
-			pv[0] = 2 * size - x;
-			pv[1] = z + 2 * size - 1;
+			pv[0] = (float)(2 * size - x);
+			pv[1] = (float)(z + 2 * size - 1);
 			pv += 2;
 		}
 	}
@@ -191,8 +191,8 @@ void TerrainNode::SetupVertexBuffer(int size)
 	{
 		for (int z = 0; z < 2 * size + 1; z++)
 		{
-			pv[0] = x;
-			pv[1] = 2 * size - z;
+			pv[0] = (float)x;
+			pv[1] = (float)(2 * size - z);
 			pv += 2;
 		}
 	}
@@ -201,32 +201,32 @@ void TerrainNode::SetupVertexBuffer(int size)
 	// Left, right
 	for (int y = 0; y < (size - 1) * 2; y++)
 	{
-		pv[0] = 0;
-		pv[1] = y * 2;
-		pv[2] = 0;
-		pv[3] = y * 2;
-		pv[4] = 0;
-		pv[5] = y * 2 + 1;
-		pv[6] = 0;
-		pv[7] = y * 2 + 2;
-		pv[8] = 0;
-		pv[9] = y * 2 + 2;
+		pv[0] = 0.f;
+		pv[1] = (float)(y * 2);
+		pv[2] = 0.f;
+		pv[3] = (float)(y * 2);
+		pv[4] = 0.f;
+		pv[5] = (float)(y * 2 + 1);
+		pv[6] = 0.f;
+		pv[7] = (float)(y * 2 + 2);
+		pv[8] = 0.f;
+		pv[9] = (float)(y * 2 + 2);
 		pv += 10;
 	}
 
 	// Top, bottom
 	for (int x = 0; x < (size - 1) * 2; x++)
 	{
-		pv[0] = x * 2;
-		pv[1] = 0;
-		pv[2] = x * 2;
-		pv[3] = 0;
-		pv[4] = x * 2 + 1;
-		pv[5] = 0;
-		pv[6] = x * 2 + 2;
-		pv[7] = 0;
-		pv[8] = x * 2 + 2;
-		pv[9] = 0;
+		pv[0] = (float)(x * 2);
+		pv[1] = 0.f;
+		pv[2] = (float)(x * 2);
+		pv[3] = 0.f;
+		pv[4] = (float)(x * 2 + 1);
+		pv[5] = 0.f;
+		pv[6] = (float)(x * 2 + 2);
+		pv[7] = 0.f;
+		pv[8] = (float)(x * 2 + 2);
+		pv[9] = 0.f;
 		pv += 10;
 	}
 
@@ -237,9 +237,10 @@ void TerrainNode::SetupVertexBuffer(int size)
 	Array<VertexComponent> components;
 	components.Append(VertexComponent(VertexComponent::Position, 0, VertexComponent::Float2, 0));
 	//components.Append(VertexComponent(VertexComponent::TexCoord1, 0, VertexComponent::Float2, 0));
-	//float cornerVertexData[] = { -0.5, -0.5, 0, 1, -0.5, 0.5, 0, 0, 0.5, 0.5, 1, 0, 0.5, -0.5, 1, 1 };
+	GLubyte cornerVertexData[] = { 0, 1, 0, 0, 1, 0, 1, 1 };
 	Ptr<MemoryVertexBufferLoader> vbLoader = MemoryVertexBufferLoader::Create();
-	vbLoader->Setup(components, num_vertices, vertices, 2 * num_vertices * sizeof(GLubyte), VertexBuffer::UsageImmutable, VertexBuffer::AccessNone);
+	//vbLoader->Setup(components, 4, cornerVertexData, sizeof(cornerVertexData), VertexBuffer::UsageImmutable, VertexBuffer::AccessNone);
+	vbLoader->Setup(components, num_vertices, vertices, 2 * num_vertices * sizeof(float), VertexBuffer::UsageImmutable, VertexBuffer::AccessNone);
 
 	this->vbo = VertexBuffer::Create();
 	this->vbo->SetLoader(vbLoader.upcast<ResourceLoader>());
@@ -267,7 +268,7 @@ static unsigned int block_index_count(unsigned int width, unsigned int height)
 }
 
 //! [Generating index buffer]
-static GLushort *generate_block_indices(GLushort *pi, unsigned int vertex_buffer_offset,
+static int *generate_block_indices(int *pi, unsigned int vertex_buffer_offset,
 	unsigned int width, unsigned int height)
 {
 	// Stamp out triangle strips back and forth.
@@ -336,8 +337,8 @@ void TerrainNode::SetupIndexBuffer(int size)
 		4 * trim_top_left.count +
 		4 * degenerate_left.count;
 
-	GLushort *indices = new GLushort[num_indices];
-	GLushort *pi = indices;
+	int *indices = new int[num_indices];
+	int *pi = indices;
 
 	// Main block
 	block.offset = pi - indices;
@@ -460,7 +461,7 @@ void TerrainNode::SetupIndexBuffer(int size)
 	}
 
 	Ptr<MemoryIndexBufferLoader> ibLoader = MemoryIndexBufferLoader::Create();
-	ibLoader->Setup(IndexType::Index16, num_indices, indices, num_indices * sizeof(GLushort), IndexBuffer::UsageImmutable, IndexBuffer::AccessNone);
+	ibLoader->Setup(IndexType::Index32, num_indices, indices, num_indices * sizeof(int), IndexBuffer::UsageImmutable, IndexBuffer::AccessNone);
 
 	this->ibo = IndexBuffer::Create();
 	this->ibo->SetLoader(ibLoader.upcast<ResourceLoader>());

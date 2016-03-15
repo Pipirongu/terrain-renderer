@@ -43,7 +43,6 @@ public:
 
 private:
 	Ptr<Graphics::TerrainEntity> terrain_entity;
-	//Ptr<Graphics::ModelEntity> terrain_entity;
 
 	Ptr<Graphics::Stage> stage;
 }; 

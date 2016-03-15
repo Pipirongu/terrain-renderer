@@ -32,6 +32,7 @@ public:
 
 	/// called when we render the billboard node
 	virtual void Render();
+	virtual void OnRenderBefore(IndexT frameIndex, Timing::Time time);
 
 	void update_level_offsets(const float2& camera_pos);
 
@@ -77,7 +78,7 @@ protected:
 	size_t uniform_buffer_size;
 	//GLint uniform_buffer_align;
 
-	Util::Array<float2> level_offsets;
+	eastl::vector<float2> level_offsets;
 
 	typedef bool(*TrimConditional)(const float2& offset);
 

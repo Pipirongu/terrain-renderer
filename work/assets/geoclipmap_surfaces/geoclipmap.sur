@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NebulaT>
+    <Surface template="Geoclipmap">
+        <Param name="HeightMap" value="tex:geoclipmaps_heightmaps/heightmap" />
+    </Surface>
+</NebulaT>

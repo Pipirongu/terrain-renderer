@@ -61,7 +61,7 @@ TerrainRendererGameState::OnStateEnter(const Util::String& prevState)
 
 	//////////////////////////////////////////////////////////////////////////
 	this->terrain_entity = Graphics::TerrainEntity::Create();
-	//this->stage->AttachEntity(this->terrain_entity.cast<Graphics::GraphicsEntity>());
+	this->stage->AttachEntity(this->terrain_entity.cast<Graphics::GraphicsEntity>());
 
 	//setup terrainaddon
 	//this->terrain_renderer_addon = Terrain::TerrainRenderer::Create();
