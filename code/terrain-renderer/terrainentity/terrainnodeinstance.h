@@ -30,9 +30,11 @@ public:
 	/// destructor
 	virtual ~TerrainNodeInstance();
 
+	/// called when visibility resolves
+	virtual void OnVisibilityResolve(IndexT resolveIndex, float distToViewer);
 	/// called when we render the billboard node
 	virtual void Render();
-	virtual void OnRenderBefore(IndexT frameIndex, Timing::Time time);
+	//virtual void OnRenderBefore(IndexT frameIndex, Timing::Time time);
 
 	void update_level_offsets(const float2& camera_pos);
 
@@ -90,19 +92,19 @@ protected:
 	float2 get_offset_level(const float2& camera_pos, unsigned int level); //snapping grid
 	void update_draw_list(DrawInfo& info, size_t& ubo_offset);
 	DrawInfo get_draw_info_blocks(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
-	DrawInfo get_draw_info_vert_fixup(InstanceData *instance_data);
-	DrawInfo get_draw_info_horiz_fixup(InstanceData *instance_data);
-	DrawInfo get_draw_info_degenerate(InstanceData *instance_data, const Block& block, const float2& offset, const float2& ring_offset);
-	DrawInfo get_draw_info_degenerate_left(InstanceData *instance_data);
-	DrawInfo get_draw_info_degenerate_right(InstanceData *instance_data);
-	DrawInfo get_draw_info_degenerate_top(InstanceData *instance_data);
-	DrawInfo get_draw_info_degenerate_bottom(InstanceData *instance_data);
-	DrawInfo get_draw_info_trim_full(InstanceData *instance_data);
-	DrawInfo get_draw_info_trim(InstanceData *instance_data, const Block& block, TrimConditional cond);
-	DrawInfo get_draw_info_trim_top_right(InstanceData *instance_data);
-	DrawInfo get_draw_info_trim_top_left(InstanceData *instance_data);
-	DrawInfo get_draw_info_trim_bottom_right(InstanceData *instance_data);
-	DrawInfo get_draw_info_trim_bottom_left(InstanceData *instance_data);
+	DrawInfo get_draw_info_vert_fixup(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_horiz_fixup(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_degenerate(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list, const Block& block, const float2& offset, const float2& ring_offset);
+	DrawInfo get_draw_info_degenerate_left(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_degenerate_right(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_degenerate_top(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_degenerate_bottom(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_trim_full(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_trim(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list, const Block& block, TrimConditional cond);
+	DrawInfo get_draw_info_trim_top_right(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_trim_top_left(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_trim_bottom_right(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
+	DrawInfo get_draw_info_trim_bottom_left(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
 };
 } // namespace Models
 //------------------------------------------------------------------------------

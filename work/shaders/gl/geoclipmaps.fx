@@ -20,7 +20,7 @@ sampler2D height_map;
 
 #define HEIGHTMAP_MIN -20.0
 #define HEIGHTMAP_MAX 20.0
-#define INSTANCE_SIZE 256
+#define INSTANCE_SIZE 500
 
 shared varblock InstanceData[bool System = true;] // Use std140 packing rules for uniform block. set binding point to 0
 {
@@ -35,7 +35,7 @@ shared varblock InstanceData[bool System = true;] // Use std140 packing rules fo
 samplerstate HeightmapSampler
 {
 	Samplers = { height_map };
-	Filter = MinMagMipLinear;
+	Filter = Linear;
 	AddressU = Wrap;
 	AddressV = Wrap;
 };
@@ -63,7 +63,7 @@ vsGeoclipmap(in vec2 position, out float height_value) //in heightmap size, out 
 	
 	float level = level[gl_InstanceID];
 	vec2 uvcoord = pos/4096; //send in the size of the heightmap
-	float height = textureLod(height_map, uvcoord, level).x;
+	float height = textureLod(height_map, uvcoord, level).r;
 	//height = clamp(height, HEIGHTMAP_MIN, HEIGHTMAP_MAX);
 	
 	vec4 vert = vec4(pos.x, 100*height, pos.y, 1.0);

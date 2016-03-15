@@ -29,11 +29,12 @@ __ImplementClass(Graphics::TerrainEntity, 'TENY', Graphics::GraphicsEntity);
 */
 TerrainEntity::TerrainEntity() :
 	//texture(0),
-   // color(1,1,1,1),
-	modelInstance(0)
-	//viewAligned(false)
+    //color(1,1,1,1),
+	modelInstance(0),
+	viewAligned(false)
 {
 	this->SetType(GraphicsEntityType::Model);
+	this->SetAlwaysVisible(true);
 }
 
 //------------------------------------------------------------------------------
@@ -68,8 +69,9 @@ TerrainEntity::OnActivate()
 	this->terrain_node = TerrainNode::Create();
 	//Setup terrain node wti
 	//this->terrain_node->SetBoundingBox(Math::bbox(Math::point(0, 0, 0), Math::vector(1, 1, 1)));
-	this->terrain_node->SetBoundingBox(Math::bbox(Math::point(0, 0, 0), Math::vector((4096 - 1.f) / 2.f, 10.f, (4096 - 1.f) / 2.f)));
-	//this->SetAlwaysVisible(true);
+	//this->terrain_node->SetBoundingBox(Math::bbox(Math::point(0, 0, 0), Math::vector(4096 / 2.f, 10.f, 4096 / 2.f)));
+	this->SetAlwaysVisible(true);
+	//this->SetVisible(true);
 	this->terrain_node->SetSurfaceName("sur:geoclipmap_surfaces/geoclipmap");
 	this->terrain_node->SetName("root");
 	this->terrain_node->SetClipmapData(64, 10, 1.f);
@@ -84,14 +86,14 @@ TerrainEntity::OnActivate()
 	// get node instance and set the view space aligned flag
 	Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
 
- //   // setup material
- //   const Ptr<SurfaceInstance>& surface = nodeInstance->GetSurfaceInstance();
+    // setup material
+    const Ptr<SurfaceInstance>& surface = nodeInstance->GetSurfaceInstance();
  //   this->textureVariable = surface->GetConstant("AlbedoMap");
  //   this->colorVariable = surface->GetConstant("Color");
 
 	//// create a variable instance and set the texture
 	//this->textureVariable->SetTexture(this->texture->GetTexture());
-	//nodeInstance->SetInViewSpace(this->viewAligned);
+	nodeInstance->SetInViewSpace(this->viewAligned);
 
 	// set to be valid
 	this->SetValid(true);
@@ -133,49 +135,75 @@ TerrainEntity::OnDeactivate()
 	GraphicsEntity::OnDeactivate();
 }
 
-////------------------------------------------------------------------------------
-///**
-//*/
-//void
-//TerrainEntity::OnResolveVisibility(IndexT frameIndex, bool updateLod)
-//{
-//	n_assert(this->modelInstance.isvalid());
-//	VisResolver::Instance()->AttachVisibleModelInstancePlayerCamera(frameIndex, this->modelInstance, updateLod);
-//}
-//
-////------------------------------------------------------------------------------
-///**
-//*/
-//void 
-//TerrainEntity::OnTransformChanged()
-//{
-//	// set transform of model instance
-//	if (this->modelInstance.isvalid())
-//	{
-//		this->modelInstance->SetTransform(this->transform);
-//	}
-//
-//    GraphicsEntity::OnTransformChanged();
-//}
-//
-////------------------------------------------------------------------------------
-///**
-//*/
-//void 
-//TerrainEntity::OnNotifyCullingVisible(const Ptr<GraphicsEntity>& observer, IndexT frameIndex)
-//{
-//	if (this->IsVisible())
-//	{
-//		// call back our model-instance
-//		if (this->modelInstance.isvalid())
-//		{
-//			this->modelInstance->OnNotifyCullingVisible(frameIndex, this->entityTime);
-//		}
-//	}
-//
-//	// call parent-class
-//	GraphicsEntity::OnNotifyCullingVisible(observer, frameIndex);
-//}
+//------------------------------------------------------------------------------
+/**
+*/
+void
+TerrainEntity::OnHide()
+{
+	if (this->modelInstance.isvalid())
+	{
+		this->modelInstance->OnHide(this->entityTime);
+	}
+	GraphicsEntity::OnHide();
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void
+TerrainEntity::OnShow()
+{
+	if (this->modelInstance.isvalid())
+	{
+		this->modelInstance->OnShow(this->entityTime);
+	}
+	GraphicsEntity::OnShow();
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void
+TerrainEntity::OnResolveVisibility(IndexT frameIndex, bool updateLod)
+{
+	n_assert(this->modelInstance.isvalid());
+	VisResolver::Instance()->AttachVisibleModelInstancePlayerCamera(frameIndex, this->modelInstance, updateLod);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+TerrainEntity::OnTransformChanged()
+{
+	// set transform of model instance
+	if (this->modelInstance.isvalid())
+	{
+		this->modelInstance->SetTransform(this->transform);
+	}
+
+    GraphicsEntity::OnTransformChanged();
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+TerrainEntity::OnNotifyCullingVisible(const Ptr<GraphicsEntity>& observer, IndexT frameIndex)
+{
+	if (this->IsVisible())
+	{
+		// call back our model-instance
+		if (this->modelInstance.isvalid())
+		{
+			this->modelInstance->OnNotifyCullingVisible(frameIndex, this->entityTime);
+		}
+	}
+
+	// call parent-class
+	GraphicsEntity::OnNotifyCullingVisible(observer, frameIndex);
+}
 
 //------------------------------------------------------------------------------
 /**

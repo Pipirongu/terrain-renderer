@@ -33,10 +33,15 @@ public:
 	/// deactivate entity
 	void OnDeactivate();
 
+	/// hide billboard
+	void OnHide();
+	/// show billboard
+	void OnShow();
+
 	/// sets billboard to be view aligned
-	//void SetViewAligned(bool b);
+	void SetViewAligned(bool b);
 	/// gets billboard flag
-	//const bool GetViewAligned() const;
+	const bool GetViewAligned() const;
 
 	/// set picking id of model entity
 	void SetPickingId(IndexT i);
@@ -46,16 +51,16 @@ public:
 private:
 
 	/// resolve visibility
-	//void OnResolveVisibility(IndexT frameIndex, bool updateLod = false);
+	void OnResolveVisibility(IndexT frameIndex, bool updateLod = false);
 	/// update transforms
-	//void OnTransformChanged();
+	void OnTransformChanged();
 	/// notify visibility
-	//void OnNotifyCullingVisible(const Ptr<GraphicsEntity>& observer, IndexT frameIndex);
+	void OnNotifyCullingVisible(const Ptr<GraphicsEntity>& observer, IndexT frameIndex);
 	/// prepare rendering
 	void OnRenderBefore(IndexT frameIndex);
 	
 	IndexT pickingId;
-	//bool viewAligned;
+	bool viewAligned;
 	//Resources::ResourceId resource;
    // Math::float4 color;
     
@@ -68,23 +73,23 @@ private:
 	Ptr<Terrain::TerrainNode> terrain_node;
 }; 
 
-////------------------------------------------------------------------------------
-///**
-//*/
-//inline void 
-//TerrainEntity::SetViewAligned(bool b)
-//{
-//	this->viewAligned = b;
-//}
-//
-////------------------------------------------------------------------------------
-///**
-//*/
-//inline const bool 
-//TerrainEntity::GetViewAligned() const
-//{
-//	return this->viewAligned;
-//}
+//------------------------------------------------------------------------------
+/**
+*/
+inline void 
+TerrainEntity::SetViewAligned(bool b)
+{
+	this->viewAligned = b;
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+inline const bool 
+TerrainEntity::GetViewAligned() const
+{
+	return this->viewAligned;
+}
 
 //------------------------------------------------------------------------------
 /**

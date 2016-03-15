@@ -4,7 +4,28 @@
         <Layers>
             <Layer name="Default" autoload="true" visible="true" locked="false" />
         </Layers>
-        <Entities />
+        <Entities>
+            <Object category="Camera">
+                <Attributes>
+                    <_ID>terrainlevel|object|Camera|Camera_0</_ID>
+                    <Id>Camera</Id>
+                    <_Level>terrainlevel</_Level>
+                    <_Layers>Default</_Layers>
+                    <Guid>2e8732ee-f2ec-4af5-8e4d-e5495d4ba2a9</Guid>
+                    <ParentGuid>00000000-0000-0000-0000-000000000000</ParentGuid>
+                    <Transform>1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 4.226497, 4.226500, 4.226497, 1.000000</Transform>
+                    <Name></Name>
+                    <Placeholder>examples/camera</Placeholder>
+                    <Graphics>examples/camera</Graphics>
+                    <CameraFocus>true</CameraFocus>
+                    <InputMouseGrab>false</InputMouseGrab>
+                    <MayaCameraCenterOfInterest>0.000000,0.000000,0.000000,0.000000</MayaCameraCenterOfInterest>
+                    <InputFocus>true</InputFocus>
+                    <MayaCameraDefaultUpVec>0.000000,1.000000,0.000000,1.000000</MayaCameraDefaultUpVec>
+                    <MayaCameraRenderCenterOfInterest>false</MayaCameraRenderCenterOfInterest>
+                </Attributes>
+            </Object>
+        </Entities>
         <Global WorldCenter="0.000000,0.000000,0.000000,1.000000" WorldExtents="20.000000,20.000000,20.000000,0.000000" PostEffectPreset="Default" _Layers="Default" GlobalLightTransform="1.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.707107, -0.707107, 0.000000, 0.000000, 0.707107, 0.707107, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000" />
     </NebulaLevel>
 </Level>

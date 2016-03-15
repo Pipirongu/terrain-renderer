@@ -40,7 +40,7 @@
    <Pass batch="Picking" shader="picking" variation="Static"/>
    <Pass batch="FlatGeometryLit" shader="geoclipmaps" variation="GeoclipmapStatic"/>
  
-   <Param name="HeightMap" type="string" defaultValue="tex:geoclipmaps_heightmaps/heightmap"/>
+   <Param name="height_map" type="string" defaultValue="tex:geoclipmaps_heightmaps/heightmap"/>
    
    <!--<Pass batch="Unlit" shader="my_simple" variation="MyStatic|Alt1"/> -->
    <!--<Param name="MatDiffuse" type="float4" defaultValue="1,0,0,1" edit="color"/>-->
