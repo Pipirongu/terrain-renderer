@@ -13,6 +13,8 @@
 #include "graphics/pointlightentity.h"
 #include "game/entity.h"
 
+#include "terrainentity.h"
+
 //------------------------------------------------------------------------------
 namespace Tools
 {
@@ -40,7 +42,7 @@ public:
 	void HandleInput();
 
 private:
-	//Ptr<Terrain::TerrainRenderer> terrain_renderer_addon;
+	Ptr<Graphics::TerrainEntity> terrain_entity;
 	//Ptr<Graphics::ModelEntity> terrain_entity;
 
 	Ptr<Graphics::Stage> stage;

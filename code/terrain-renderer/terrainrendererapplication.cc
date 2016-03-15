@@ -78,7 +78,7 @@ TerrainRendererApplication::SetupStateHandlers()
 	gameState->SetSetupMode(TerrainRendererGameState::NewGame);
 	gameState->SetName("DemoState");
 	// select the level to be loaded explicitly instead of the default one
-	gameState->SetLevelName("demo_full");
+	gameState->SetLevelName("terrainlevel");
 
 	this->AddStateHandler(gameState.get());
 

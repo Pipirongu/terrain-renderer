@@ -135,32 +135,6 @@ TerrainEntity::OnDeactivate()
 /**
 */
 void
-TerrainEntity::OnHide()
-{
-	//if (this->modelInstance.isvalid())
-	//{
-	//	this->modelInstance->OnHide(this->entityTime);
-	//}
-	GraphicsEntity::OnHide();
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
-void
-TerrainEntity::OnShow()
-{
-	//if (this->modelInstance.isvalid())
-	//{
-	//	this->modelInstance->OnShow(this->entityTime);
-	//}
-	GraphicsEntity::OnShow();
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
-void
 TerrainEntity::OnResolveVisibility(IndexT frameIndex, bool updateLod)
 {
 	n_assert(this->modelInstance.isvalid());
@@ -204,22 +178,6 @@ TerrainEntity::OnNotifyCullingVisible(const Ptr<GraphicsEntity>& observer, Index
 //------------------------------------------------------------------------------
 /**
 */
-void
-TerrainEntity::SetColor(const Math::float4& color)
-{
-    this->color = color;
-
-    // update billboard color
-    scalar biggest = n_max(n_max(this->color.x(), this->color.y()), this->color.z());
-    float4 normalizedColor = this->color;
-    normalizedColor /= biggest;
-    normalizedColor.set_w(1);
-    this->colorVariable->SetValue(normalizedColor);
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
 void 
 TerrainEntity::OnRenderBefore(IndexT frameIndex)
 {
@@ -233,16 +191,6 @@ TerrainEntity::OnRenderBefore(IndexT frameIndex)
 
         GraphicsEntity::OnRenderBefore(frameIndex);
     }
-}
-
-//------------------------------------------------------------------------------
-/**
-    Handle a message, override this method accordingly in subclasses!
-*/
-void
-TerrainEntity::HandleMessage(const Ptr<Message>& msg)
-{
-   //__Dispatch(TerrainEntity, this, msg);
 }
 
 } // namespace Graphics

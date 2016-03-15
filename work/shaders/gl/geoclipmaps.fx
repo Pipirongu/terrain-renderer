@@ -10,39 +10,45 @@
 
 sampler2D height_map;
 
-struct PerInstanceData
-{
-	vec2 offset; // World-space offset in XZ plane.
-	float scale; // Scaling factor for vertex offsets (per-instance)
-	float level; // lod-level to use when sampling heightmap
-	//vec3 debug_color;
-};
-
-shared varblock InstanceData[bool System = true;] // Use std140 packing rules for uniform block. set binding point to 0
-{
-	PerInstanceData instance[256];
-};
+// struct PerInstanceData
+// {
+	// vec2 offset; // World-space offset in XZ plane.
+	// float scale; // Scaling factor for vertex offsets (per-instance)
+	// float level; // lod-level to use when sampling heightmap
+	// //vec3 debug_color;
+// };
 
 #define HEIGHTMAP_MIN -20.0
 #define HEIGHTMAP_MAX 20.0
+#define INSTANCE_SIZE 256
 
-samplerstate GridSampler
+shared varblock InstanceData[bool System = true;] // Use std140 packing rules for uniform block. set binding point to 0
+{
+	//PerInstanceData instance[256];
+	vec2 offset[INSTANCE_SIZE]; // World-space offset in XZ plane.
+	float scale[INSTANCE_SIZE]; // Scaling factor for vertex offsets (per-instance)
+	float level[INSTANCE_SIZE]; // lod-level to use when sampling heightmap
+};
+
+
+
+samplerstate HeightmapSampler
 {
 	Samplers = { height_map };
 	Filter = MinMagMipLinear;
+	AddressU = Wrap;
+	AddressV = Wrap;
 };
 
-state GridState;
+state GeoclipState;
 // {
+	// CullMode = None;	
 	// BlendEnabled[0] = true;
-	// SrcBlend[0] = SrcAlpha;
+	// SrcBlend[0] = SrcAlpha;	
 	// DstBlend[0] = OneMinusSrcAlpha;
-	// CullMode = None;
-	// DepthClamp = false;
-	// DepthWrite = false;
-	// PolygonOffsetEnabled = true;
-	// PolygonOffsetFactor = 1.0f;
-	// PolygonOffsetUnits = 2.0f;
+	// DepthEnabled = true;
+	// DepthWrite = true;
+	// MultisampleEnabled = true;
 // };
 
 //------------------------------------------------------------------------------
@@ -50,13 +56,12 @@ state GridState;
 */
 shader
 void
-vsGrid(in vec2 position,
-	out float height_value) //in heightmap size, out uvcoord
+vsGeoclipmap(in vec2 position, out float height_value) //in heightmap size, out uvcoord
 {
-	vec2 local_offset = position * instance[gl_InstanceID].scale;
-	vec2 pos = instance[gl_InstanceID].offset + local_offset;
+	vec2 local_offset = position * scale[gl_InstanceID];
+	vec2 pos = offset[gl_InstanceID] + local_offset;
 	
-	float level = instance[gl_InstanceID].level;
+	float level = level[gl_InstanceID];
 	vec2 uvcoord = pos/4096; //send in the size of the heightmap
 	float height = textureLod(height_map, uvcoord, level).x;
 	//height = clamp(height, HEIGHTMAP_MIN, HEIGHTMAP_MAX);
@@ -78,9 +83,7 @@ vsGrid(in vec2 position,
 */
 shader
 void
-psGrid(
-	in float height_value, 
-	[color0] out vec4 color) //in uvcoord to sample
+psGeoclipmap(in float height_value, [color0] out vec4 color) //in uvcoord to sample
 {
 	color = vec4(height_value, height_value, height_value, 1);
 	
@@ -98,4 +101,4 @@ psGrid(
 //------------------------------------------------------------------------------
 /**
 */
-SimpleTechnique(Default, "Static", vsGrid(), psGrid(), GridState); //????
+SimpleTechnique(Geoclipmap, "GeoclipmapStatic", vsGeoclipmap(), psGeoclipmap(), GeoclipState);

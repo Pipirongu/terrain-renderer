@@ -33,11 +33,6 @@ public:
 	/// deactivate entity
 	void OnDeactivate();
 
-	/// hide billboard
-	void OnHide();
-	/// show billboard
-	void OnShow();
-
 	/// sets billboard to be view aligned
 	void SetViewAligned(bool b);
 	/// gets billboard flag
@@ -47,18 +42,6 @@ public:
 	void SetPickingId(IndexT i);
 	/// get picking id of model entity
 	const IndexT GetPickingId() const;
-
-	/// sets billboard texture
-	void SetTexture(const Resources::ResourceId& texture);
-	/// gets billboard texture
-	const Resources::ResourceId& GetTexture() const;
-    /// sets billboard color
-    void SetColor(const Math::float4& color);
-    /// gets billboard color
-    const Math::float4& GetColor() const;
-
-    /// handle a message
-    virtual void HandleMessage(const Ptr<Messaging::Message>& msg);
 
 private:
 
@@ -119,38 +102,6 @@ inline void
 TerrainEntity::SetPickingId(IndexT i)
 {
 	this->pickingId = i;
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
-inline void 
-TerrainEntity::SetTexture(const Resources::ResourceId& texture)
-{
-	n_assert(texture.IsValid());
-	this->resource = texture;
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
-inline const Resources::ResourceId& 
-TerrainEntity::GetTexture() const
-{
-	return this->resource;
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
-
-//------------------------------------------------------------------------------
-/**
-*/
-inline const Math::float4& 
-TerrainEntity::GetColor() const
-{
-    return this->color;
 }
 
 } // namespace Graphics

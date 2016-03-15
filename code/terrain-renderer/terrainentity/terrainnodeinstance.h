@@ -30,8 +30,6 @@ public:
 	/// destructor
 	virtual ~TerrainNodeInstance();
 
-	/// called when visibility resolves
-	virtual void OnVisibilityResolve(IndexT resolveIndex, float distToViewer);
 	/// called when we render the billboard node
 	virtual void Render();
 
@@ -45,6 +43,10 @@ protected:
 
 	Ptr<CoreGraphics::ConstantBuffer> uniform_buffer;
 	Ptr<TerrainNode> terrain_node;
+
+	Ptr<CoreGraphics::ShaderVariable> offset_shdvar;
+	Ptr<CoreGraphics::ShaderVariable> scale_shdvar;
+	Ptr<CoreGraphics::ShaderVariable> level_shdvar;
 
 	void SetupUniformBuffer();
 
@@ -81,13 +83,12 @@ protected:
 
 	//GLsync syncObj;
 	//InstanceData* data;
-	Util::Array<InstanceData> data;
 	Ptr<CoreGraphics::Shader> geoclipmap_shader;
 	Ptr<CoreGraphics::ShaderVariable> instance_data_blockvar;
 
 	float2 get_offset_level(const float2& camera_pos, unsigned int level); //snapping grid
 	void update_draw_list(DrawInfo& info, size_t& ubo_offset);
-	DrawInfo get_draw_info_blocks(Util::Array<InstanceData>& instance_data);
+	DrawInfo get_draw_info_blocks(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list);
 	DrawInfo get_draw_info_vert_fixup(InstanceData *instance_data);
 	DrawInfo get_draw_info_horiz_fixup(InstanceData *instance_data);
 	DrawInfo get_draw_info_degenerate(InstanceData *instance_data, const Block& block, const float2& offset, const float2& ring_offset);

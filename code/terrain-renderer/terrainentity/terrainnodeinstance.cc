@@ -46,71 +46,10 @@ TerrainNodeInstance::~TerrainNodeInstance()
 /**
 */
 void
-TerrainNodeInstance::OnVisibilityResolve(IndexT resolveIndex, float distToViewer)
-{
-		//// check if node is inside lod distances or if no lod is used
-		//const Ptr<TransformNode>& transformNode = this->modelNode.downcast<TransformNode>();
-		//if (transformNode->CheckLodDistance(distToViewer))
-		//{
-		//       this->modelNode->AddVisibleNodeInstance(resolveIndex, this->surfaceInstance->GetCode(), this);
-		//	ModelNodeInstance::OnVisibilityResolve(resolveIndex, distToViewer);
-		//}
-	}
-
-//------------------------------------------------------------------------------
-/**
-*/
-void
 TerrainNodeInstance::Setup(const Ptr<ModelInstance>& inst, const Ptr<ModelNode>& node, const Ptr<ModelNodeInstance>& parentNodeInst)
 {
 	Ptr<TerrainNode> terrain_node = this->modelNode.downcast<TerrainNode>();
 	this->geoclipmap_shader = CoreGraphics::ShaderServer::Instance()->GetShader("shd:geoclipmaps");
-
-	//n_assert(!this->vb.isvalid());
-	//n_assert(!this->ib.isvalid());
-
-	//// up to parent class
-	//StateNodeInstance::Setup(inst, node, parentNodeInst);
-
-	//// setup the corner vertex buffer
-	//Array<VertexComponent> components;
-	//components.Append(VertexComponent(VertexComponent::Position, 0, VertexComponent::Float2, 0));
-	//components.Append(VertexComponent(VertexComponent::TexCoord1, 0, VertexComponent::Float2, 0));
-	//float cornerVertexData[] = { -0.5, -0.5, 0, 1,  -0.5, 0.5, 0, 0,  0.5, 0.5, 1, 0,  0.5, -0.5, 1, 1 };
-	//Ptr<MemoryVertexBufferLoader> vbLoader = MemoryVertexBufferLoader::Create();
-	//vbLoader->Setup(components, 4, cornerVertexData, sizeof(cornerVertexData), VertexBuffer::UsageImmutable, VertexBuffer::AccessNone);
-
-	//this->vb = VertexBuffer::Create();
-	//this->vb->SetLoader(vbLoader.upcast<ResourceLoader>());
-	//this->vb->SetAsyncEnabled(false);
-	//this->vb->Load();
-	//if (!this->vb->IsLoaded())
-	//{
-	//	n_error("BillboardNodeInstance: Failed to setup billboard vertex buffer!");
-	//}
-	//this->vb->SetLoader(0);
-
-	//// setup the corner index buffer
-	//ushort cornerIndexData[] = { 0, 1, 2, 2, 3, 0 };
-	//Ptr<MemoryIndexBufferLoader> ibLoader = MemoryIndexBufferLoader::Create();
-	//ibLoader->Setup(IndexType::Index16, 6, cornerIndexData, sizeof(cornerIndexData), IndexBuffer::UsageImmutable, IndexBuffer::AccessNone);
-
-	//this->ib = IndexBuffer::Create();
-	//this->ib->SetLoader(ibLoader.upcast<ResourceLoader>());
-	//this->ib->SetAsyncEnabled(false);
-	//this->ib->Load();
-	//if (!this->ib->IsLoaded())
-	//{
-	//	n_error("BillboardNodeInstance: Failed to setup billboard index buffer!");
-	//}
-	//this->ib->SetLoader(0);
-
-	//// setup the primitive group
-	//this->primGroup.SetBaseVertex(0);
-	//this->primGroup.SetNumVertices(4);
-	//this->primGroup.SetBaseIndex(0);
-	//this->primGroup.SetNumIndices(6);
-	//this->primGroup.SetPrimitiveTopology(PrimitiveTopology::TriangleList);
 }
 
 //------------------------------------------------------------------------------
@@ -119,14 +58,6 @@ TerrainNodeInstance::Setup(const Ptr<ModelInstance>& inst, const Ptr<ModelNode>&
 void
 TerrainNodeInstance::Discard()
 {
-	//n_assert(this->vb->IsLoaded());
-	//n_assert(this->ib->IsLoaded());
-
-	//this->vb->Unload();
-	//this->vb = 0;
-	//this->ib->Unload();
-	//this->ib = 0;
-
 	StateNodeInstance::Discard();
 }
 
@@ -139,6 +70,8 @@ TerrainNodeInstance::Render()
 	StateNodeInstance::Render();
 	RenderDevice* renderDevice = RenderDevice::Instance();
 
+	//get cameras position
+	this->update_level_offsets();
 	this->update_draw_list();
 
 	//send viewprojection
@@ -170,6 +103,7 @@ TerrainNodeInstance::SetupUniformBuffer()
 {
 	this->uniform_buffer = CoreGraphics::ConstantBuffer::Create();
 	//this->uniform_buffer_size = 2 * (12 + 4 + 1 + 4) * terrain_node->levels * sizeof(InstanceData);
+	//this->uniform_buffer_size = 2 * (12 + 4 + 1 + 4) * terrain_node->levels * sizeof(InstanceData);
 	//this->uniform_buffer->SetSize(this->uniform_buffer_size);
 	//this->uniform_buffer->Setup(1);
 
@@ -177,6 +111,9 @@ TerrainNodeInstance::SetupUniformBuffer()
 	//const Ptr<Shader>&  geoclip_shdinst = geoclip_shdserver->LoadShader("shd:geoclipmaps.fx");
 
 	this->uniform_buffer->SetupFromBlockInShader(this->geoclipmap_shader, "InstanceData", 3);
+	this->offset_shdvar = this->uniform_buffer->GetVariableByName("offset");
+	this->scale_shdvar = this->uniform_buffer->GetVariableByName("scale");
+	this->level_shdvar = this->uniform_buffer->GetVariableByName("level");
 }
 
 //! [Snapping clipmap level to a grid]
@@ -513,7 +450,7 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_trim_bottom_lef
 }
 
 // These are the basic N-by-N tesselated quads.
-TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_blocks(Util::Array<InstanceData>& instance_data)
+TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_blocks(Util::Array<float2>& offset_list, Util::Array<float>& scale_list, Util::Array<float>& level_list)
 {
 	// Special case for level 0, here we draw the base quad in a tight 4x4 grid. This needs to be padded with a full trim (get_draw_info_trim_full()).
 	DrawInfo info;
@@ -536,7 +473,10 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_blocks(Util::Ar
 
 			//if (intersects_frustum(instance.offset, block.range, 0))
 			//{
-			instance_data.Append(instance); //moves pointer once to next available index
+			offset_list.Append(instance.offset);
+			scale_list.Append(instance.scale);
+			level_list.Append(instance.level);
+			//instance_data.Append(instance); //moves pointer once to next available index
 			info.instances++;
 			//}
 		}
@@ -572,7 +512,10 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_blocks(Util::Ar
 
 				//if (intersects_frustum(instance.offset, block.range, i))
 				//{
-				instance_data.Append(instance);
+				offset_list.Append(instance.offset);
+				scale_list.Append(instance.scale);
+				level_list.Append(instance.level);
+				//instance_data.Append(instance);
 				info.instances++;
 				//}
 			}
@@ -601,33 +544,25 @@ void TerrainNodeInstance::update_draw_list(DrawInfo& info, size_t& uniform_buffe
 	draw_list.Append(info);
 
 	// Have to ensure that the uniform buffer is always bound at aligned offsets.
-	uniform_buffer_offset = uniform_buffer_offset + info.instances * sizeof(InstanceData);
+	uniform_buffer_offset = uniform_buffer_offset + info.instances * sizeof(InstanceData); //remove the sizeof instancedata
 }
 
 void TerrainNodeInstance::update_draw_list()
 {
 	draw_list.Clear();
 
-	//glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
-
-	// Map the uniform buffer. //gets a pointer so we can modify the data on gpu instead of copy it
-	//InstanceData *data = static_cast<InstanceData*>(glMapBufferRange(GL_UNIFORM_BUFFER, 0, uniform_buffer_size, GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_WRITE_BIT));
-
-	//if (!data)
-	//{
-	//	printf("Failed to map uniform buffer.\n");
-	//	return;
-	//}
-
 	DrawInfo info;
 	size_t uniform_buffer_offset = 0;
+
+	Util::Array<float2> offset_list;
+	Util::Array<float> scale_list;
+	Util::Array<float> level_list;
 
 	// Create a draw list. The number of draw calls is equal to the different types
 	// of blocks. The blocks are instanced as necessary in the get_draw_info* calls.
 
-
 	// Main blocks
-	info = get_draw_info_blocks(data); //buffer_offset typecast instance pointer to char pointer and offsets it. It's PerInstanceData array in shader that gets modified.
+	info = get_draw_info_blocks(offset_list, scale_list, level_list); //buffer_offset typecast instance pointer to char pointer and offsets it. It's PerInstanceData array in shader that gets modified.
 	update_draw_list(info, uniform_buffer_offset);
 
 	//// Vertical ring fixups
@@ -678,11 +613,10 @@ void TerrainNodeInstance::update_draw_list()
 	//update_draw_list(info, uniform_buffer_offset);
 
 	this->uniform_buffer->CycleBuffers();
-	this->uniform_buffer->Update(data, 0, data.Size() * sizeof(InstanceData));
-
-	// lock the buffer:
-	//syncObj = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-	//glUnmapBuffer(GL_UNIFORM_BUFFER);
+	//this->uniform_buffer->Update(data, 0, data.Size() * sizeof(InstanceData));
+	this->offset_shdvar->SetFloat2Array(offset_list.Begin(), offset_list.Size());
+	this->scale_shdvar->SetFloatArray(scale_list.Begin(), scale_list.Size());
+	this->level_shdvar->SetFloatArray(level_list.Begin(), level_list.Size());
 }
 
 void TerrainNodeInstance::render_draw_list()
