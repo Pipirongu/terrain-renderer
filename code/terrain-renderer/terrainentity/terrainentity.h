@@ -48,6 +48,8 @@ public:
 	/// get picking id of model entity
 	const IndexT GetPickingId() const;
 
+	void SetSurface(const Util::String& name);
+
 private:
 
 	/// resolve visibility

@@ -9,6 +9,12 @@
 #include "lib/techniques.fxh"
 
 sampler2D height_map;
+sampler2D albedo_map;
+
+float height_map_size;
+float height_map_multiplier;
+vec4 instance_debug_color;
+int base_instance;
 
 // struct PerInstanceData
 // {
@@ -34,10 +40,18 @@ shared varblock InstanceData[bool System = true;] // Use std140 packing rules fo
 
 samplerstate HeightmapSampler
 {
-	Samplers = { height_map };
+	Samplers = {height_map};
 	Filter = Linear;
 	AddressU = Wrap;
 	AddressV = Wrap;
+};
+
+samplerstate HeightmapSampler1
+{
+	Samplers = {albedo_map};
+	//Filter = Linear;
+	AddressU = Mirror;
+	AddressV = Mirror;
 };
 
 state GeoclipState;
@@ -51,26 +65,35 @@ state GeoclipState;
 	// MultisampleEnabled = true;
 // };
 
+state WireframeState
+{
+	CullMode = None;
+	FillMode = Line;
+};
+
 //------------------------------------------------------------------------------
 /**
 */
 shader
 void
-vsGeoclipmap(in vec2 position, out float height_value) //in heightmap size, out uvcoord
+vsGeoclipmap(in vec2 position, out float height_value, out vec4 debug_color, out vec2 terrain_uv, out float terrain_level) //out uvcoord
 {
 	vec2 local_offset = position * scale[gl_InstanceID];
 	vec2 pos = offset[gl_InstanceID] + local_offset;
 	
 	float level = level[gl_InstanceID];
-	vec2 uvcoord = pos/4096; //send in the size of the heightmap
+	vec2 uvcoord = pos/height_map_size; //send in the size of the heightmap
 	float height = textureLod(height_map, uvcoord, level).r;
 	//height = clamp(height, HEIGHTMAP_MIN, HEIGHTMAP_MAX);
 	
-	vec4 vert = vec4(pos.x, 100*height, pos.y, 1.0);
+	vec4 vert = vec4(pos.x, height_map_multiplier*height, pos.y, 1.0);
 	
 	gl_Position = ViewProjection * vert;
 	
 	height_value = height;
+	debug_color = instance_debug_color;
+	terrain_uv = uvcoord;
+	terrain_level = level;
 	
 	
 	// vec4 pos = vec4(position.x + EyePos.x, 0, position.y + EyePos.z, 1);
@@ -83,22 +106,17 @@ vsGeoclipmap(in vec2 position, out float height_value) //in heightmap size, out 
 */
 shader
 void
-psGeoclipmap(in float height_value, [color0] out vec4 color) //in uvcoord to sample
+psGeoclipmap(in float height_value, in vec4 debug_color, in vec2 terrain_uv, in float terrain_level, [color0] out vec4 color) //in uvcoord to sample
 {
-	color = vec4(height_value, height_value, height_value, 1);
+	vec3 color1 = textureLod(albedo_map, terrain_uv, terrain_level).rgb;
+	color = vec4(color1, 1);
 	
-	// float len = 1.0 - smoothstep(1.0f, 250.0f, distance(EyePos.xz, WorldPos.xz));
-	// vec2 uv = (WorldPos.xz / vec2(GridSize)) - vec2(0.5);
-	// vec4 c = texture(GridTex, uv).rgba;
-	// //vec2 line = (vec2(cos(WorldPos.x / GridSize), cos(WorldPos.z / GridSize)) - vec2(0.90, 0.90));
-	// //float c = saturate(max(line.x, line.y)) * 5;
-	
-	// //c = smoothstep(0.5f, 1, c);
-	// float alpha = len * c.a;
-	// color = vec4(c.rgb, saturate(alpha));
+	//color = vec4(height_value, height_value, height_value, 1);
+	//color = debug_color;
 }
 
 //------------------------------------------------------------------------------
 /**
 */
 SimpleTechnique(Geoclipmap, "GeoclipmapStatic", vsGeoclipmap(), psGeoclipmap(), GeoclipState);
+SimpleTechnique(Geoclipmap_Wireframe, "GeoclipmapWireframe", vsGeoclipmap(), psGeoclipmap(), WireframeState);

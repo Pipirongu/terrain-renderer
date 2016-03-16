@@ -67,11 +67,7 @@ TerrainEntity::OnActivate()
 	// setup base model
 	this->terrain_model = Model::Create();
 	this->terrain_node = TerrainNode::Create();
-	//Setup terrain node wti
-	//this->terrain_node->SetBoundingBox(Math::bbox(Math::point(0, 0, 0), Math::vector(1, 1, 1)));
-	//this->terrain_node->SetBoundingBox(Math::bbox(Math::point(0, 0, 0), Math::vector(4096 / 2.f, 10.f, 4096 / 2.f)));
 	this->SetAlwaysVisible(true);
-	//this->SetVisible(true);
 	this->terrain_node->SetSurfaceName("sur:geoclipmap_surfaces/geoclipmap");
 	this->terrain_node->SetName("root");
 	this->terrain_node->SetClipmapData(64, 10, 1.f);
@@ -83,17 +79,19 @@ TerrainEntity::OnActivate()
 	this->modelInstance->SetTransform(this->transform); //*****
 	this->modelInstance->SetPickingId(this->pickingId);
 
-	// get node instance and set the view space aligned flag
 	Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
+	const Ptr<SurfaceInstance>& surfaceInstance = nodeInstance->GetSurfaceInstance();
 
-    // setup material
-    const Ptr<SurfaceInstance>& surface = nodeInstance->GetSurfaceInstance();
- //   this->textureVariable = surface->GetConstant("AlbedoMap");
- //   this->colorVariable = surface->GetConstant("Color");
+	Ptr<Materials::SurfaceConstant> height_map_texture = surfaceInstance->GetConstant("height_map");
+	Ptr<CoreGraphics::Texture> textureObject = (CoreGraphics::Texture*)height_map_texture->GetValue().GetObject();
 
-	//// create a variable instance and set the texture
-	//this->textureVariable->SetTexture(this->texture->GetTexture());
-	nodeInstance->SetInViewSpace(this->viewAligned);
+	float size = (float)textureObject->GetWidth();
+
+	Ptr<Materials::SurfaceConstant> height_map_size = surfaceInstance->GetConstant("height_map_size");
+	height_map_size->SetValue(size);
+
+	Ptr<Materials::SurfaceConstant> height_map_multiplier = surfaceInstance->GetConstant("height_map_multiplier");
+	height_map_multiplier->SetValue(500.f);
 
 	// set to be valid
 	this->SetValid(true);
@@ -222,6 +220,11 @@ TerrainEntity::OnRenderBefore(IndexT frameIndex)
 
         GraphicsEntity::OnRenderBefore(frameIndex);
     }
+}
+
+void TerrainEntity::SetSurface(const Util::String& name)
+{
+	this->terrain_node->SetSurfaceName(name);
 }
 
 } // namespace Graphics

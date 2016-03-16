@@ -124,16 +124,15 @@ TerrainRendererGameState::HandleInput()
 	// reload layout if key gets pressed
 	if (kbd->KeyDown(Input::Key::F1))
 	{
-        const Ptr<UI::UiLayout>& layout = UI::UiFeatureUnit::Instance()->GetLayout("demo");
-        layout->Reload();
-	}
-	if(kbd->KeyDown(Input::Key::X))
-	{
-		TerrainRendererApplication::Instance()->RequestState("Exit");
+		this->terrain_entity->SetSurface("sur:geoclipmap_surfaces/geoclipmap");
 	}
 	if (kbd->KeyDown(Input::Key::F2))
 	{
-		EffectsFeature::EffectsFeatureUnit::Instance()->EmitGraphicsEffect(Math::matrix44::translation(n_rand(-5, 5), 10, n_rand(-5, 5)), "mdl:particles/newparticle.n3", 10.0f);
+		this->terrain_entity->SetSurface("sur:geoclipmap_surfaces/wireframe");
+	}
+	if (kbd->KeyDown(Input::Key::X))
+	{
+		TerrainRendererApplication::Instance()->RequestState("Exit");
 	}
 }
 } // namespace Tools

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <NebulaT>
     <Surface template="Geoclipmap">
-        <Param name="AlbedoMap" value="tex:system/placeholder" />
         <Param name="height_map" value="tex:geoclipmap_heightmaps/heightmap" />
+        <Param name="albedo_map" value="tex:geoclipmap_textures/geoclipmap_texture" />
+        <Param name="instance_debug_color" value="1.000000,1.000000,1.000000,1.000000" />
+        <Param name="height_map_size" value="1024.000000" />
+        <Param name="height_map_multiplier" value="10.000000" />
+        <Param name="base_instance" value="0" />
     </Surface>
 </NebulaT>

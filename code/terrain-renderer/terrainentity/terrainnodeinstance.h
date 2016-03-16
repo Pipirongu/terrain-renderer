@@ -74,6 +74,7 @@ protected:
 		size_t uniform_buffer_offset;
 		unsigned int indices;
 		unsigned int instances;
+		float4 debug_color;
 	};
 	Util::Array<DrawInfo> draw_list;
 
