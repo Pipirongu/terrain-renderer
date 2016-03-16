@@ -9,6 +9,7 @@
 #include "terrainnodeinstance.h"
 #include "models/nodes/statenodeinstance.h"
 #include "models/visresolver.h"
+#include "qttoolkit/contentbrowser/code/widgets/materials/mutablesurface.h"
 
 using namespace Resources;
 using namespace CoreGraphics;
@@ -34,7 +35,6 @@ TerrainEntity::TerrainEntity() :
 	viewAligned(false)
 {
 	this->SetType(GraphicsEntityType::Model);
-	this->SetAlwaysVisible(true);
 }
 
 //------------------------------------------------------------------------------
@@ -224,7 +224,13 @@ TerrainEntity::OnRenderBefore(IndexT frameIndex)
 
 void TerrainEntity::SetSurface(const Util::String& name)
 {
-	this->terrain_node->SetSurfaceName(name);
+	////this->terrain_node->SetSurfaceName(name);
+	//Ptr<Materials::ManagedSurface> managedSurface = Resources::ResourceManager::Instance()->CreateManagedResource(Surface::RTTI, name, NULL, true).downcast<Materials::ManagedSurface>();
+	//Ptr<MutableSurface> mutableSurface = managedSurface->GetSurface().downcast<MutableSurface>();
+
+	//const Ptr<MutableSurfaceInstance> surfaceInstance = mutableSurface->CreateInstance();
+	//Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
+	//nodeInstance->SetSurfaceInstance(surfaceInstance.upcast<Materials::SurfaceInstance>());
 }
 
 } // namespace Graphics

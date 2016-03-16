@@ -109,10 +109,10 @@ void
 psGeoclipmap(in float height_value, in vec4 debug_color, in vec2 terrain_uv, in float terrain_level, [color0] out vec4 color) //in uvcoord to sample
 {
 	vec3 color1 = textureLod(albedo_map, terrain_uv, terrain_level).rgb;
-	color = vec4(color1, 1);
+	//color = vec4(color1, 1);
 	
 	//color = vec4(height_value, height_value, height_value, 1);
-	//color = debug_color;
+	color = debug_color;
 }
 
 //------------------------------------------------------------------------------

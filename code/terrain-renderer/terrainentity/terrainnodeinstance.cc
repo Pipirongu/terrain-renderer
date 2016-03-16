@@ -671,11 +671,10 @@ void TerrainNodeInstance::render_draw_list()
 	{
 		if (draw_list[i].instances){
 			//upload to shader colors per instance
-			const Ptr<Materials::SurfaceInstance>& surfaceInstance = this->GetSurfaceInstance();
-			Ptr<Materials::SurfaceConstant> instance_debug_color = surfaceInstance->GetConstant("instance_debug_color");
+			Ptr<Materials::SurfaceConstant> instance_debug_color = this->surfaceInstance->GetConstant("instance_debug_color");
 			instance_debug_color->SetValue(draw_list[i].debug_color);
 
-			Ptr<Materials::SurfaceConstant> base_instance = surfaceInstance->GetConstant("base_instance");
+			Ptr<Materials::SurfaceConstant> base_instance = this->surfaceInstance->GetConstant("base_instance");
 			base_instance->SetValue(draw_list[i].uniform_buffer_offset);
 
 			//bind uniform buffer
