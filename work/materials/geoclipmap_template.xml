@@ -38,14 +38,13 @@
   -->
   <Material name="Geoclipmap" type="static" desc="material for terrain">
    <Pass batch="Picking" shader="picking" variation="Static"/>
+   <!-- <Pass batch="GlobalShadow" shader="shadow" variation="Static|Global"/> -->
    <Pass batch="FlatGeometryLit" shader="geoclipmaps" variation="GeoclipmapStatic"/>
  
    <Param name="height_map" type="string" defaultValue="tex:geoclipmaps_heightmaps/heightmap"/>
    <Param name="albedo_map" type="string" defaultValue="tex:geoclipmaps_textures/geoclipmap_texture"/>
    <Param name="height_map_size" type="float" defaultValue="1024.0f" min="0.0f" max="4096.0f" desc="Terrain size"/>
    <Param name="height_map_multiplier" type="float" defaultValue="10.0f" min="0.0f" max="1000.0f" desc="Height multiplier"/>
-   <Param name="instance_debug_color" type="float4" defaultValue="1.0f, 1.0f, 1.0f, 1.0f" min="0.0f, 0.0f, 0.0f, 0.0f" max="10.0f, 10.0f, 10.0f, 1.0f" edit="color" desc="debug color for instance draw"/>
-   <Param name="base_instance" type="int" defaultValue="0" desc="debug color for instance draw"/>
 
   
    
@@ -59,8 +58,6 @@
    <Param name="albedo_map" type="string" defaultValue="tex:geoclipmaps_textures/geoclipmap_texture"/>
    <Param name="height_map_size" type="float" defaultValue="1024.0f" min="0.0f" max="4096.0f" desc="Terrain size"/>
    <Param name="height_map_multiplier" type="float" defaultValue="10.0f" min="0.0f" max="1000.0f" desc="Height multiplier"/>
-   <Param name="instance_debug_color" type="float4" defaultValue="1.0f, 1.0f, 1.0f, 1.0f" min="0.0f, 0.0f, 0.0f, 0.0f" max="10.0f, 10.0f, 10.0f, 1.0f" edit="color" desc="debug color for instance draw"/>
-   <Param name="base_instance" type="int" defaultValue="0" min="0" max="1000" desc="debug color for instance draw"/>
    
   </Material>
   

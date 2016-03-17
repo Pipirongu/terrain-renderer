@@ -34,7 +34,6 @@ public:
 	virtual void OnVisibilityResolve(IndexT resolveIndex, float distToViewer);
 	/// called when we render the billboard node
 	virtual void Render();
-	//virtual void OnRenderBefore(IndexT frameIndex, Timing::Time time);
 
 	void update_level_offsets(const float2& camera_pos);
 
@@ -44,12 +43,17 @@ protected:
 	/// called when removed
 	virtual void Discard();
 
+	IndexT bufferIndex;
+	// create buffer lock
+	Ptr<CoreGraphics::BufferLock> offsets_BufferLock;
 	Ptr<CoreGraphics::ConstantBuffer> uniform_buffer;
 	Ptr<TerrainNode> terrain_node;
+	Ptr<Graphics::CameraEntity> camera;
 
 	Ptr<CoreGraphics::ShaderVariable> offset_shdvar;
 	Ptr<CoreGraphics::ShaderVariable> scale_shdvar;
 	Ptr<CoreGraphics::ShaderVariable> level_shdvar;
+	Util::Array<float> id_offset_list;
 
 	void SetupUniformBuffer();
 
@@ -59,8 +63,6 @@ protected:
 		float2 offset; // Offset of the block in XZ plane (world space). This is prescaled.
 		float scale; // Scale factor of local offsets (vertex coordinates).
 		float level; // Clipmap LOD level of block.
-		//float2 debug_color;
-		//float padding; //padding for debug_color
 	};
 
 	//update the instanced draw list structure
@@ -78,15 +80,10 @@ protected:
 	};
 	Util::Array<DrawInfo> draw_list;
 
-	size_t uniform_buffer_size;
-	//GLint uniform_buffer_align;
-
 	eastl::vector<float2> level_offsets;
 
 	typedef bool(*TrimConditional)(const float2& offset);
 
-	//GLsync syncObj;
-	//InstanceData* data;
 	Ptr<CoreGraphics::Shader> geoclipmap_shader;
 	Ptr<CoreGraphics::ShaderVariable> instance_data_blockvar;
 

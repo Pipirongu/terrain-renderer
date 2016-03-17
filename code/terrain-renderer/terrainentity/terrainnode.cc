@@ -234,13 +234,10 @@ void TerrainNode::SetupVertexBuffer(int size)
 
 
 	// setup the corner vertex buffer
-	Array<VertexComponent> components;
-	components.Append(VertexComponent(VertexComponent::Position, 0, VertexComponent::Float2, 0));
-	//components.Append(VertexComponent(VertexComponent::TexCoord1, 0, VertexComponent::Float2, 0));
-	GLubyte cornerVertexData[] = { 0, 1, 0, 0, 1, 0, 1, 1 };
+	Array<VertexComponent> position_components;
+	position_components.Append(VertexComponent((Base::VertexComponentBase::SemanticName)0, 0, VertexComponent::Float2, 0));
 	Ptr<MemoryVertexBufferLoader> vbLoader = MemoryVertexBufferLoader::Create();
-	//vbLoader->Setup(components, 4, cornerVertexData, sizeof(cornerVertexData), VertexBuffer::UsageImmutable, VertexBuffer::AccessNone);
-	vbLoader->Setup(components, num_vertices, vertices, 2 * num_vertices * sizeof(float), VertexBuffer::UsageImmutable, VertexBuffer::AccessNone);
+	vbLoader->Setup(position_components, num_vertices, vertices, 2 * num_vertices * sizeof(float), VertexBuffer::UsageImmutable, VertexBuffer::AccessNone);
 
 	this->vbo = VertexBuffer::Create();
 	this->vbo->SetLoader(vbLoader.upcast<ResourceLoader>());
@@ -252,10 +249,33 @@ void TerrainNode::SetupVertexBuffer(int size)
 	}
 	this->vbo->SetLoader(0);
 
-	//glGenBuffers(1, &vertex_buffer);
-	//glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	//glBufferData(GL_ARRAY_BUFFER, 2 * num_vertices * sizeof(GLubyte), vertices, GL_STATIC_DRAW);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+	// setup the corner vertex buffer
+	Array<VertexComponent> offset_components;
+	offset_components.Append(VertexComponent((Base::VertexComponentBase::SemanticName)1, 0, VertexComponent::Float, 1, Base::VertexComponentBase::PerInstance, 1));
+	Ptr<MemoryVertexBufferLoader> offset_vbLoader = MemoryVertexBufferLoader::Create();
+	offset_vbLoader->Setup(offset_components, 768, NULL, 0, VertexBuffer::UsageDynamic, VertexBuffer::AccessWrite, VertexBuffer::SyncingCoherentPersistent);
+
+	this->offset_buffer = VertexBuffer::Create();
+	this->offset_buffer->SetLoader(offset_vbLoader.upcast<ResourceLoader>());
+	this->offset_buffer->SetAsyncEnabled(false);
+	this->offset_buffer->Load();
+	if (!this->offset_buffer->IsLoaded())
+	{
+		n_error("TerrainNode: Failed to setup terrain vertex buffer!");
+	}
+	this->offset_buffer->SetLoader(0);
+
+	this->mapped_offsets = this->offset_buffer->Map(Base::ResourceBase::MapWrite);
+
+	Array<VertexComponent> components;
+	components.AppendArray(position_components);
+	components.AppendArray(offset_components);
+	this->vertexLayout = VertexLayout::Create();
+	this->vertexLayout->SetStreamBuffer(0, this->vbo->GetOGL4VertexBuffer());
+	this->vertexLayout->SetStreamBuffer(1, this->offset_buffer->GetOGL4VertexBuffer());
+	this->vertexLayout->Setup(components);
 
 	delete[] vertices;
 }

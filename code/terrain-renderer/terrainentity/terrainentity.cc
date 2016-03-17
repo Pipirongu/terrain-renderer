@@ -10,6 +10,7 @@
 #include "models/nodes/statenodeinstance.h"
 #include "models/visresolver.h"
 #include "qttoolkit/contentbrowser/code/widgets/materials/mutablesurface.h"
+#include "renderutil/nodelookuputil.h"
 
 using namespace Resources;
 using namespace CoreGraphics;
@@ -52,17 +53,8 @@ void
 TerrainEntity::OnActivate()
 {
 	n_assert(!this->IsActive());
-	//n_assert(this->resource.IsValid());
-	//n_assert(!this->texture.isvalid());
 	n_assert(!this->modelInstance.isvalid());
-	//n_assert(!this->textureVariable.isvalid());
 	GraphicsEntity::OnActivate();
-
-	//ResourceManager* resManager = ResourceManager::Instance();
-	//ShaderServer* shdServer = ShaderServer::Instance();
-
-	// create texture
-	//this->texture = resManager->CreateManagedResource(Texture::RTTI, this->resource, NULL, true).downcast<ManagedTexture>();
 
 	// setup base model
 	this->terrain_model = Model::Create();
@@ -70,13 +62,13 @@ TerrainEntity::OnActivate()
 	this->SetAlwaysVisible(true);
 	this->terrain_node->SetSurfaceName("sur:geoclipmap_surfaces/geoclipmap");
 	this->terrain_node->SetName("root");
-	this->terrain_node->SetClipmapData(64, 10, 1.f);
+	this->terrain_node->SetClipmapData(64, 4, 1.f);
 	this->terrain_node->LoadResources(true);
 	this->terrain_model->AttachNode(this->terrain_node.upcast<ModelNode>());
 	
 	// create model instance
 	this->modelInstance = this->terrain_model->CreateInstance();
-	this->modelInstance->SetTransform(this->transform); //*****
+	//this->modelInstance->SetTransform(this->transform); //*****
 	this->modelInstance->SetPickingId(this->pickingId);
 
 	Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
@@ -224,9 +216,10 @@ TerrainEntity::OnRenderBefore(IndexT frameIndex)
 
 void TerrainEntity::SetSurface(const Util::String& name)
 {
-	////this->terrain_node->SetSurfaceName(name);
+	//////this->terrain_node->SetSurfaceName(name);
 	//Ptr<Materials::ManagedSurface> managedSurface = Resources::ResourceManager::Instance()->CreateManagedResource(Surface::RTTI, name, NULL, true).downcast<Materials::ManagedSurface>();
 	//Ptr<MutableSurface> mutableSurface = managedSurface->GetSurface().downcast<MutableSurface>();
+
 
 	//const Ptr<MutableSurfaceInstance> surfaceInstance = mutableSurface->CreateInstance();
 	//Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();

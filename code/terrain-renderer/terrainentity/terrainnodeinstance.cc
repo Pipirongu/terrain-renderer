@@ -18,6 +18,8 @@
 #include "resources/resourceloader.h"
 #include "coregraphics/renderdevice.h"
 #include "graphics/cameraentity.h"
+#include "coregraphics/base/vertexcomponentbase.h"
+#include "coregraphics/transformdevice.h"
 
 using namespace CoreGraphics;
 using namespace Util;
@@ -30,7 +32,8 @@ __ImplementClass(Terrain::TerrainNodeInstance, 'TNIE', Models::StateNodeInstance
 //------------------------------------------------------------------------------
 /**
 */
-TerrainNodeInstance::TerrainNodeInstance()
+TerrainNodeInstance::TerrainNodeInstance() :
+	bufferIndex(0)
 {
 	// empty
 }
@@ -55,23 +58,12 @@ TerrainNodeInstance::Setup(const Ptr<ModelInstance>& inst, const Ptr<ModelNode>&
 	this->terrain_node = this->modelNode.downcast<TerrainNode>();
 	this->geoclipmap_shader = CoreGraphics::ShaderServer::Instance()->GetShader("shd:geoclipmaps");
 	this->SetupUniformBuffer();
-
-	//// setup the corner vertex buffer
-	//Array<VertexComponent> components;
-	//components.Append(VertexComponent(VertexComponent::Position, 0, VertexComponent::Float2, 0, Base::VertexComponentBase::PerInstance));
-	//Ptr<MemoryVertexBufferLoader> vbLoader = MemoryVertexBufferLoader::Create();
-	//vbLoader->Setup(components, 500, pointer_to_offset_list, 500 * sizeof(float2), VertexBuffer::UsageImmutable, VertexBuffer::AccessNone);
-
-	//this->vbo = VertexBuffer::Create();
-	//this->vbo->SetLoader(vbLoader.upcast<ResourceLoader>());
-	//this->vbo->SetAsyncEnabled(false);
-	//this->vbo->Load();
-	//if (!this->vbo->IsLoaded())
-	//{
-	//	n_error("TerrainNode: Failed to setup terrain vertex buffer!");
-	//}
-	//this->vbo->SetLoader(0);
-
+	for (unsigned int i = 0; i < 256; i++){
+		this->id_offset_list.Append((float)i);
+	}
+	//list with offsets memcpy
+	memcpy(this->terrain_node->mapped_offsets, this->id_offset_list.Begin(), this->id_offset_list.Size() * sizeof(float));
+	this->offsets_BufferLock = BufferLock::Create();
 }
 
 //------------------------------------------------------------------------------
@@ -89,11 +81,11 @@ TerrainNodeInstance::Discard()
 void
 TerrainNodeInstance::Render()
 {
+	this->offsets_BufferLock->WaitForBuffer(this->bufferIndex);
 	StateNodeInstance::Render();
 	RenderDevice* renderDevice = RenderDevice::Instance();
 
-	const Ptr<Graphics::CameraEntity>& camera = Graphics::GraphicsServer::Instance()->GetCurrentView()->GetCameraEntity();
-	Math::float4 camera_position = (Math::matrix44::inverse(camera->GetViewTransform())).get_position();
+	Math::float4 camera_position = CoreGraphics::TransformDevice::Instance()->GetInvViewTransform().get_position();
 	float2 camera_pos(camera_position.x(), camera_position.z());
 	//float2 camera_pos(0.f, 0.f);
 
@@ -104,7 +96,8 @@ TerrainNodeInstance::Render()
 	//send viewprojection
 	//bind vao
 	renderDevice->SetStreamVertexBuffer(0, terrain_node->vbo, 0);
-	renderDevice->SetVertexLayout(terrain_node->vbo->GetVertexLayout());
+	renderDevice->SetStreamVertexBuffer(1, terrain_node->offset_buffer, 0);
+	renderDevice->SetVertexLayout(terrain_node->vertexLayout); //own vertexlayout
 	renderDevice->SetIndexBuffer(terrain_node->ibo);
 
 	//bind uniform buffer
@@ -112,6 +105,9 @@ TerrainNodeInstance::Render()
 	this->instance_data_blockvar->SetBufferHandle(this->uniform_buffer->GetHandle());
 
 	this->render_draw_list();
+	// lock this segment of the buffer and traverse to our next buffer (we are using triple buffering)
+	RenderDevice::EnqueueBufferLockIndex(this->offsets_BufferLock, this->bufferIndex);
+	this->bufferIndex = (this->bufferIndex + 1) % 3;
 }
 
 //------------------------------------------------------------------------------
@@ -121,15 +117,7 @@ void
 TerrainNodeInstance::SetupUniformBuffer()
 {
 	this->uniform_buffer = CoreGraphics::ConstantBuffer::Create();
-	//this->uniform_buffer_size = 2 * (12 + 4 + 1 + 4) * terrain_node->levels * sizeof(InstanceData);
-	//this->uniform_buffer_size = 2 * (12 + 4 + 1 + 4) * terrain_node->levels * sizeof(InstanceData);
-	//this->uniform_buffer->SetSize(this->uniform_buffer_size);
-	//this->uniform_buffer->Setup(1);
-
-	//ShaderServer* geoclip_shdserver = ShaderServer::Instance();
-	//const Ptr<Shader>&  geoclip_shdinst = geoclip_shdserver->LoadShader("shd:geoclipmaps.fx");
-
-	this->uniform_buffer->SetupFromBlockInShader(this->geoclipmap_shader, "InstanceData", 1);
+	this->uniform_buffer->SetupFromBlockInShader(this->geoclipmap_shader, "InstanceData", 3);
 	this->offset_shdvar = this->uniform_buffer->GetVariableByName("offset");
 	this->scale_shdvar = this->uniform_buffer->GetVariableByName("scale");
 	this->level_shdvar = this->uniform_buffer->GetVariableByName("level");
@@ -616,47 +604,46 @@ void TerrainNodeInstance::update_draw_list()
 	info.debug_color = float4(0, 1, 0, 1);
 	update_draw_list(info, uniform_buffer_offset);
 
-	///************************************************************************/
-	///*                                                                      */
-	///************************************************************************/
-	//// Left-side degenerates
-	//info = get_draw_info_degenerate_left(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	/************************************************************************/
+	/*                                                                      */
+	/************************************************************************/
+	// Left-side degenerates
+	info = get_draw_info_degenerate_left(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//// Right-side degenerates
-	//info = get_draw_info_degenerate_right(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	// Right-side degenerates
+	info = get_draw_info_degenerate_right(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//// Top-side degenerates
-	//info = get_draw_info_degenerate_top(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	// Top-side degenerates
+	info = get_draw_info_degenerate_top(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//// Bottom-side degenerates
-	//info = get_draw_info_degenerate_bottom(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	// Bottom-side degenerates
+	info = get_draw_info_degenerate_bottom(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//// Full trim
-	//info = get_draw_info_trim_full(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	// Full trim
+	info = get_draw_info_trim_full(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//// Top-right trim
-	//info = get_draw_info_trim_top_right(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	// Top-right trim
+	info = get_draw_info_trim_top_right(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//// Top-left trim
-	//info = get_draw_info_trim_top_left(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	// Top-left trim
+	info = get_draw_info_trim_top_left(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//// Bottom-right trim
-	//info = get_draw_info_trim_bottom_right(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	// Bottom-right trim
+	info = get_draw_info_trim_bottom_right(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//// Bottom-left trim
-	//info = get_draw_info_trim_bottom_left(offset_list, scale_list, level_list);
-	//update_draw_list(info, uniform_buffer_offset);
+	// Bottom-left trim
+	info = get_draw_info_trim_bottom_left(offset_list, scale_list, level_list);
+	update_draw_list(info, uniform_buffer_offset);
 
-	//this->uniform_buffer->CycleBuffers();
-	//this->uniform_buffer->Update(data, 0, data.Size() * sizeof(InstanceData));
+	this->uniform_buffer->CycleBuffers();
 	this->offset_shdvar->SetFloat2Array(offset_list.Begin(), offset_list.Size());
 	this->scale_shdvar->SetFloatArray(scale_list.Begin(), scale_list.Size());
 	this->level_shdvar->SetFloatArray(level_list.Begin(), level_list.Size());
@@ -670,17 +657,6 @@ void TerrainNodeInstance::render_draw_list()
 	for (int i = 0; i < draw_list.Size(); i++)
 	{
 		if (draw_list[i].instances){
-			//upload to shader colors per instance
-			Ptr<Materials::SurfaceConstant> instance_debug_color = this->surfaceInstance->GetConstant("instance_debug_color");
-			instance_debug_color->SetValue(draw_list[i].debug_color);
-
-			Ptr<Materials::SurfaceConstant> base_instance = this->surfaceInstance->GetConstant("base_instance");
-			base_instance->SetValue(draw_list[i].uniform_buffer_offset);
-
-			//bind uniform buffer
-			//set prim group
-			//draw instanced
-
 			CoreGraphics::PrimitiveGroup primGroup;
 			// setup the primitive group
 			primGroup.SetBaseVertex(0);
@@ -690,12 +666,6 @@ void TerrainNodeInstance::render_draw_list()
 
 			renderDevice->SetPrimitiveGroup(primGroup);
 			renderDevice->DrawIndexedInstanced(draw_list[i].instances, draw_list[i].uniform_buffer_offset); //offset the gl_instanceID
-			// Bind uniform buffer at same binding point as in shader
-			//glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniform_buffer);
-			//glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniform_buffer, draw_list[i].uniform_buffer_offset, realign_offset(draw_list[i].instances * sizeof(InstanceData), uniform_buffer_align));
-
-			// Draw all instances.
-			//glDrawElementsInstanced(GL_TRIANGLE_STRIP, draw_list[i].indices, GL_UNSIGNED_SHORT, reinterpret_cast<const GLvoid*>(draw_list[i].index_buffer_offset * sizeof(GLushort)), draw_list[i].instances);
 		}
 	}
 }

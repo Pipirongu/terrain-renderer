@@ -49,8 +49,9 @@ public:
 
 	Ptr<CoreGraphics::VertexBuffer> vbo;
 	Ptr<CoreGraphics::IndexBuffer> ibo;
-	//ubo
-	//CoreGraphics::PrimitiveGroup primGroup;
+	Ptr<CoreGraphics::VertexBuffer> offset_buffer;
+	Ptr<CoreGraphics::VertexLayout> vertexLayout;
+	void* mapped_offsets;
 
 
 	//blocks
