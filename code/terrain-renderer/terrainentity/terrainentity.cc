@@ -62,7 +62,7 @@ TerrainEntity::OnActivate()
 	this->SetAlwaysVisible(true);
 	this->terrain_node->SetSurfaceName("sur:geoclipmap_surfaces/geoclipmap");
 	this->terrain_node->SetName("root");
-	this->terrain_node->SetClipmapData(64, 4, 1.f);
+	this->terrain_node->SetClipmapData(64, 10, 1.f);
 	this->terrain_node->LoadResources(true);
 	this->terrain_model->AttachNode(this->terrain_node.upcast<ModelNode>());
 	
@@ -216,14 +216,15 @@ TerrainEntity::OnRenderBefore(IndexT frameIndex)
 
 void TerrainEntity::SetSurface(const Util::String& name)
 {
-	//////this->terrain_node->SetSurfaceName(name);
-	//Ptr<Materials::ManagedSurface> managedSurface = Resources::ResourceManager::Instance()->CreateManagedResource(Surface::RTTI, name, NULL, true).downcast<Materials::ManagedSurface>();
-	//Ptr<MutableSurface> mutableSurface = managedSurface->GetSurface().downcast<MutableSurface>();
+	////this->terrain_node->SetSurfaceName(name);
+	Ptr<Materials::ManagedSurface> managedSurface = Resources::ResourceManager::Instance()->CreateManagedResource(Surface::RTTI, name, NULL, true).downcast<Materials::ManagedSurface>();
+	Ptr<Surface> mutableSurface = managedSurface->GetSurface();
 
 
-	//const Ptr<MutableSurfaceInstance> surfaceInstance = mutableSurface->CreateInstance();
-	//Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
-	//nodeInstance->SetSurfaceInstance(surfaceInstance.upcast<Materials::SurfaceInstance>());
+	const Ptr<SurfaceInstance> surfaceInstance = mutableSurface->CreateInstance();
+	Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
+	nodeInstance->SetSurfaceInstance(surfaceInstance);
+	nodeInstance->UpdateShaderHandles();
 }
 
 } // namespace Graphics

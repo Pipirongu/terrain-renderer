@@ -71,6 +71,7 @@ public:
 private:
 	void SetupVertexBuffer(int size);
 	void SetupIndexBuffer(int size);
+	void SetupBlockRanges(int size);
 }; 
 
 } // namespace Models

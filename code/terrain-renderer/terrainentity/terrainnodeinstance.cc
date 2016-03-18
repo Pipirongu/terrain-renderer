@@ -32,8 +32,7 @@ __ImplementClass(Terrain::TerrainNodeInstance, 'TNIE', Models::StateNodeInstance
 //------------------------------------------------------------------------------
 /**
 */
-TerrainNodeInstance::TerrainNodeInstance() :
-	bufferIndex(0)
+TerrainNodeInstance::TerrainNodeInstance()
 {
 	// empty
 }
@@ -58,12 +57,12 @@ TerrainNodeInstance::Setup(const Ptr<ModelInstance>& inst, const Ptr<ModelNode>&
 	this->terrain_node = this->modelNode.downcast<TerrainNode>();
 	this->geoclipmap_shader = CoreGraphics::ShaderServer::Instance()->GetShader("shd:geoclipmaps");
 	this->SetupUniformBuffer();
+	level_offsets.resize(terrain_node->levels);
 	for (unsigned int i = 0; i < 256; i++){
 		this->id_offset_list.Append((float)i);
 	}
 	//list with offsets memcpy
 	memcpy(this->terrain_node->mapped_offsets, this->id_offset_list.Begin(), this->id_offset_list.Size() * sizeof(float));
-	this->offsets_BufferLock = BufferLock::Create();
 }
 
 //------------------------------------------------------------------------------
@@ -81,19 +80,20 @@ TerrainNodeInstance::Discard()
 void
 TerrainNodeInstance::Render()
 {
-	this->offsets_BufferLock->WaitForBuffer(this->bufferIndex);
 	StateNodeInstance::Render();
 	RenderDevice* renderDevice = RenderDevice::Instance();
 
 	Math::float4 camera_position = CoreGraphics::TransformDevice::Instance()->GetInvViewTransform().get_position();
-	float2 camera_pos(camera_position.x(), camera_position.z());
-	//float2 camera_pos(0.f, 0.f);
+	//float2 camera_pos(camera_position.x(), camera_position.z());
+	float2 camera_pos(0.f, 0.f);
 
+	this->culled_counter = 0;
 	//get cameras position
 	this->update_level_offsets(camera_pos);
 	this->update_draw_list();
 
-	//send viewprojection
+	n_printf("Culled Blocks %d\n", this->culled_counter);
+
 	//bind vao
 	renderDevice->SetStreamVertexBuffer(0, terrain_node->vbo, 0);
 	renderDevice->SetStreamVertexBuffer(1, terrain_node->offset_buffer, 0);
@@ -105,9 +105,6 @@ TerrainNodeInstance::Render()
 	this->instance_data_blockvar->SetBufferHandle(this->uniform_buffer->GetHandle());
 
 	this->render_draw_list();
-	// lock this segment of the buffer and traverse to our next buffer (we are using triple buffering)
-	RenderDevice::EnqueueBufferLockIndex(this->offsets_BufferLock, this->bufferIndex);
-	this->bufferIndex = (this->bufferIndex + 1) % 3;
 }
 
 //------------------------------------------------------------------------------
@@ -170,7 +167,7 @@ float2 TerrainNodeInstance::get_offset_level(const float2& camera_pos, unsigned 
 
 void TerrainNodeInstance::update_level_offsets(const float2& camera_pos)
 {
-	level_offsets.resize(terrain_node->levels);
+	//level_offsets.resize(terrain_node->levels);
 	for (int i = 0; i < terrain_node->levels; i++){
 		level_offsets[i] = get_offset_level(camera_pos, i);
 	}
@@ -223,14 +220,13 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_horiz_fixup(Uti
 		instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 
 		// Only add the instance if it's visible.
-		//if (intersects_frustum(instance.offset, horizontal.range, i))
-		//{
-		offset_list.Append(instance.offset);
-		scale_list.Append(instance.scale);
-		level_list.Append(instance.level);
-		//*instances++ = instance;
-		info.instances++;
-		//}
+		if (this->IntersectsFrustum(instance.offset, terrain_node->horizontal.range, i))
+		{
+			offset_list.Append(instance.offset);
+			scale_list.Append(instance.scale);
+			level_list.Append(instance.level);
+			info.instances++;
+		}
 
 		// Right side horizontal fixup region.
 		instance.offset = level_offsets[i];
@@ -238,14 +234,13 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_horiz_fixup(Uti
 		instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 
 		// Only add the instance if it's visible.
-		//if (intersects_frustum(instance.offset, horizontal.range, i))
-		//{
-		offset_list.Append(instance.offset);
-		scale_list.Append(instance.scale);
-		level_list.Append(instance.level);
-		//*instances++ = instance;
-		info.instances++;
-		//}
+		if (this->IntersectsFrustum(instance.offset, terrain_node->horizontal.range, i))
+		{
+			offset_list.Append(instance.offset);
+			scale_list.Append(instance.scale);
+			level_list.Append(instance.level);
+			info.instances++;
+		}
 	}
 
 	return info;
@@ -273,28 +268,26 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_vert_fixup(Util
 		instance.offset = instance.offset + float2::multiply(float2(2.f * (terrain_node->size - 1), 0), float2((float)(1 << i), (float)(1 << i)));
 		instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 
-		//if (intersects_frustum(instance.offset, vertical.range, i))
-		//{
-		offset_list.Append(instance.offset);
-		scale_list.Append(instance.scale);
-		level_list.Append(instance.level);
-		//*instances++ = instance;
-		info.instances++;
-		//}
+		if (this->IntersectsFrustum(instance.offset, terrain_node->vertical.range, i))
+		{
+			offset_list.Append(instance.offset);
+			scale_list.Append(instance.scale);
+			level_list.Append(instance.level);
+			info.instances++;
+		}
 
 		// Bottom region
 		instance.offset = level_offsets[i];
 		instance.offset = instance.offset + float2::multiply(float2(2.f * (terrain_node->size - 1), 3.f * (terrain_node->size - 1) + 2), float2((float)(1 << i), (float)(1 << i)));
 		instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 
-		//if (intersects_frustum(instance.offset, vertical.range, i))
-		//{
-		offset_list.Append(instance.offset);
-		scale_list.Append(instance.scale);
-		level_list.Append(instance.level);
-		//*instances++ = instance;
-		info.instances++;
-		//}
+		if (this->IntersectsFrustum(instance.offset, terrain_node->vertical.range, i))
+		{
+			offset_list.Append(instance.offset);
+			scale_list.Append(instance.scale);
+			level_list.Append(instance.level);
+			info.instances++;
+		}
 	}
 
 	return info;
@@ -315,7 +308,7 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_degenerate(Util
 	{
 		instance.level = (float)i;
 		instance.offset = level_offsets[i];
-		instance.offset = instance.offset + float2::multiply(offset, float2((float)(1 << i, 1 << i)));
+		instance.offset = instance.offset + float2::multiply(offset, float2((float)(1 << i), (float)(1 << i)));
 
 		// This is required to differentiate between level 0 and the other levels.
 		// In clipmap level 0, we only have tightly packed N-by-N blocks.
@@ -327,14 +320,13 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_degenerate(Util
 		instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 		instance.scale = terrain_node->clipmap_scale * float(1 << i);
 
-		//if (intersects_frustum(instance.offset, block.range, i))
-		//{
-		offset_list.Append(instance.offset);
-		scale_list.Append(instance.scale);
-		level_list.Append(instance.level);
-		//*instances++ = instance;
-		info.instances++;
-		//}
+		if (this->IntersectsFrustum(instance.offset, terrain_node->block.range, i))
+		{
+			offset_list.Append(instance.offset);
+			scale_list.Append(instance.scale);
+			level_list.Append(instance.level);
+			info.instances++;
+		}
 	}
 
 	return info;
@@ -378,14 +370,13 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_trim_full(Util:
 	instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 	instance.scale = terrain_node->clipmap_scale * float(1 << 1);
 
-	//if (intersects_frustum(instance.offset, trim_full.range, 1))
-	//{
-	offset_list.Append(instance.offset);
-	scale_list.Append(instance.scale);
-	level_list.Append(instance.level);
-	//*instances = instance;
-	info.instances++;
-	//}
+	if (this->IntersectsFrustum(instance.offset, terrain_node->trim_full.range, 1))
+	{
+		offset_list.Append(instance.offset);
+		scale_list.Append(instance.scale);
+		level_list.Append(instance.level);
+		info.instances++;
+	}
 
 	return info;
 }
@@ -413,23 +404,19 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_trim(Util::Arra
 			continue;
 
 		InstanceData instance;
-		//instance.debug_color = Vector3(1, 1, 0);
-		//instance.texture_scale = 1.0f / level_size;
 		instance.level = (float)i;
 		instance.offset = level_offsets[i];
 		instance.offset = instance.offset + float2((float)((terrain_node->size - 1) << i), (float)((terrain_node->size - 1) << i));
-		//instance.texture_offset = Vector2::vec_fract((instance.offset / Vector2(1 << i)) * instance.texture_scale);
 		instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 		instance.scale = terrain_node->clipmap_scale * float(1 << i);
 
-		//if (intersects_frustum(instance.offset, block.range, i))
-		//{
-		offset_list.Append(instance.offset);
-		scale_list.Append(instance.scale);
-		level_list.Append(instance.level);
-		//*instances++ = instance;
-		info.instances++;
-		//}
+		if (this->IntersectsFrustum(instance.offset, terrain_node->block.range, i))
+		{
+			offset_list.Append(instance.offset);
+			scale_list.Append(instance.scale);
+			level_list.Append(instance.level);
+			info.instances++;
+		}
 	}
 
 	return info;
@@ -499,14 +486,13 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_blocks(Util::Ar
 			instance.offset = instance.offset + float2::multiply(float2((float)x, (float)z), float2((float)(terrain_node->size - 1), (float)(terrain_node->size - 1)));
 			instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 
-			//if (intersects_frustum(instance.offset, block.range, 0))
-			//{
-			offset_list.Append(instance.offset);
-			scale_list.Append(instance.scale);
-			level_list.Append(instance.level);
-			//instance_data.Append(instance); //moves pointer once to next available index
-			info.instances++;
-			//}
+			if (this->IntersectsFrustum(instance.offset, terrain_node->block.range, 0))
+			{
+				offset_list.Append(instance.offset);
+				scale_list.Append(instance.scale);
+				level_list.Append(instance.level);
+				info.instances++;
+			}
 		}
 	}
 
@@ -538,33 +524,19 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::get_draw_info_blocks(Util::Ar
 
 				instance.offset = float2::multiply(instance.offset, float2(terrain_node->clipmap_scale, terrain_node->clipmap_scale));
 
-				//if (intersects_frustum(instance.offset, block.range, i))
-				//{
-				offset_list.Append(instance.offset);
-				scale_list.Append(instance.scale);
-				level_list.Append(instance.level);
-				//instance_data.Append(instance);
-				info.instances++;
-				//}
+				if (this->IntersectsFrustum(instance.offset, terrain_node->block.range, i))
+				{
+					offset_list.Append(instance.offset);
+					scale_list.Append(instance.scale);
+					level_list.Append(instance.level);
+					info.instances++;
+				}
 			}
 		}
 	}
 
 	return info;
 }
-
-//// Helper template to keep the ugly pointer casting to one place.
-//template<typename T>
-//static inline T *buffer_offset(T *buffer, size_t offset)
-//{
-//	return reinterpret_cast<T*>(reinterpret_cast<unsigned char*>(buffer)+offset);
-//}
-
-//// Round up to nearest aligned offset.
-//static inline unsigned int realign_offset(size_t offset, size_t align)
-//{
-//	return (offset + align - 1) & ~(align - 1);
-//}
 
 void TerrainNodeInstance::update_draw_list(DrawInfo& info, size_t& uniform_buffer_offset)
 {
@@ -594,59 +566,62 @@ void TerrainNodeInstance::update_draw_list()
 	//info.debug_color = float4(1, 0, 0, 1);
 	update_draw_list(info, uniform_buffer_offset);
 
-	// Vertical ring fixups
-	info = get_draw_info_vert_fixup(offset_list, scale_list, level_list);
+	//// Vertical ring fixups
+	//info = get_draw_info_vert_fixup(offset_list, scale_list, level_list);
+	////info.debug_color = float4(0, 1, 0, 1);
+	//update_draw_list(info, uniform_buffer_offset);
+
+	//// Horizontal ring fixups
+	//info = get_draw_info_horiz_fixup(offset_list, scale_list, level_list);
 	//info.debug_color = float4(0, 1, 0, 1);
-	update_draw_list(info, uniform_buffer_offset);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Horizontal ring fixups
-	info = get_draw_info_horiz_fixup(offset_list, scale_list, level_list);
-	info.debug_color = float4(0, 1, 0, 1);
-	update_draw_list(info, uniform_buffer_offset);
+	///************************************************************************/
+	///*                                                                      */
+	///************************************************************************/
+	//// Left-side degenerates
+	//info = get_draw_info_degenerate_left(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	/************************************************************************/
-	/*                                                                      */
-	/************************************************************************/
-	// Left-side degenerates
-	info = get_draw_info_degenerate_left(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
+	//// Right-side degenerates
+	//info = get_draw_info_degenerate_right(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Right-side degenerates
-	info = get_draw_info_degenerate_right(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
+	//// Top-side degenerates
+	//info = get_draw_info_degenerate_top(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Top-side degenerates
-	info = get_draw_info_degenerate_top(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
+	//// Bottom-side degenerates
+	//info = get_draw_info_degenerate_bottom(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Bottom-side degenerates
-	info = get_draw_info_degenerate_bottom(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
+	//// Full trim
+	//info = get_draw_info_trim_full(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Full trim
-	info = get_draw_info_trim_full(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
+	//// Top-right trim
+	//info = get_draw_info_trim_top_right(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Top-right trim
-	info = get_draw_info_trim_top_right(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
+	//// Top-left trim
+	//info = get_draw_info_trim_top_left(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Top-left trim
-	info = get_draw_info_trim_top_left(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
+	//// Bottom-right trim
+	//info = get_draw_info_trim_bottom_right(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Bottom-right trim
-	info = get_draw_info_trim_bottom_right(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
+	//// Bottom-left trim
+	//info = get_draw_info_trim_bottom_left(offset_list, scale_list, level_list);
+	//update_draw_list(info, uniform_buffer_offset);
 
-	// Bottom-left trim
-	info = get_draw_info_trim_bottom_left(offset_list, scale_list, level_list);
-	update_draw_list(info, uniform_buffer_offset);
-
+	if (!offset_list.IsEmpty() && !scale_list.IsEmpty() && !level_list.IsEmpty())
+	{
+		this->offset_shdvar->SetFloat2Array(offset_list.Begin(), offset_list.Size());
+		this->scale_shdvar->SetFloatArray(scale_list.Begin(), scale_list.Size());
+		this->level_shdvar->SetFloatArray(level_list.Begin(), level_list.Size());
+	}
 	this->uniform_buffer->CycleBuffers();
-	this->offset_shdvar->SetFloat2Array(offset_list.Begin(), offset_list.Size());
-	this->scale_shdvar->SetFloatArray(scale_list.Begin(), scale_list.Size());
-	this->level_shdvar->SetFloatArray(level_list.Begin(), level_list.Size());
 }
 
 void TerrainNodeInstance::render_draw_list()
@@ -674,11 +649,70 @@ void TerrainNodeInstance::OnVisibilityResolve(IndexT resolveIndex, float distToV
 {
 	// check if node is inside lod distances or if no lod is used
 	const Ptr<TransformNode>& transformNode = this->modelNode.downcast<TransformNode>();
-	//if (transformNode->CheckLodDistance(distToViewer))
-	//{
+	if (transformNode->CheckLodDistance(distToViewer))
+	{
 		this->modelNode->AddVisibleNodeInstance(resolveIndex, this->surfaceInstance->GetCode(), this);
 		ModelNodeInstance::OnVisibilityResolve(resolveIndex, distToViewer);
+	}
+}
+
+void TerrainNodeInstance::UpdateShaderHandles()
+{
+	//this->terrain_node = this->modelNode.downcast<TerrainNode>();
+	this->geoclipmap_shader = CoreGraphics::ShaderServer::Instance()->GetShader("shd:geoclipmaps");
+	this->SetupUniformBuffer();
+	//list with offsets memcpy
+	memcpy(this->terrain_node->mapped_offsets, this->id_offset_list.Begin(), this->id_offset_list.Size() * sizeof(float));
+}
+
+bool TerrainNodeInstance::IntersectsFrustum(const float2& offset, const float2& range, unsigned int level)
+{
+	// These depend on the heightmap itself. These should be as small as possible to be able to cull more blocks.
+	// We know the range of the block in the XZ-plane, but not in Y as it depends on the heightmap texture.
+	// In the vertex shader, we enforce a min/max height, so it is safe to assume a range for Y.
+	float y_min = -20.0f;
+	float y_max = 20.0f;
+
+	// Create an axis-aligned bounding box.
+	// Add a twiddle factor to account for potential precision issues.
+	point center = point(offset.x(), y_min, offset.y()) + point(-0.01f, -0.01f, -0.01f);
+	vector original_extent, power_of_two_scale, clipmap_scale;
+	original_extent = vector(range.x(), 0.0f, range.y());
+	power_of_two_scale = vector(float(1 << level));
+	clipmap_scale = vector(terrain_node->clipmap_scale);
+	
+	vector extent = vector::multiply(vector::multiply(original_extent, power_of_two_scale), clipmap_scale);// +vector(0.f, y_max - y_min, 0.f) + vector(0.02f);
+	extent.y() = 0.f;
+	//vector extent = point::multiply(point::multiply(point(range.x(), 0.0f, range.y()), point(float(1 << level), float(1 << level), float(1 << level))), point(terrain_node->clipmap_scale, terrain_node->clipmap_scale, terrain_node->clipmap_scale)) + point(0, y_max - y_min, 0) + point(0.02f, 0.02f, 0.02f);
+	Math::bbox aabb(center, extent);
+	//Math::bbox aabb(Math::point(0.f, 0.f, 0.f), Math::vector(0.f, 0.f, 0.f));
+
+	const Ptr<Graphics::CameraEntity>& camera = Graphics::GraphicsServer::Instance()->GetCurrentView()->GetCameraEntity();
+	//const Math::frustum viewFrustum = camera->GetViewFrustum();
+	
+	if (aabb.clipstatus(camera->GetViewProjTransform()) == ClipStatus::Outside){
+		this->culled_counter++;
+		return false;
+	}
+	return true;
+
+	//for (unsigned int c = 0; c < 8; c++)
+	//{
+	//	// Require 4-dimensional coordinates for plane equations.
+	//	if (!viewFrustum.inside(aabb.corner_point(c))){
+	//		return false;
+	//	}
 	//}
+	//return true;
+
+	//if (viewFrustum.clipstatus(aabb) == ClipStatus::Inside){
+	//	return true;
+	//}
+	//else{
+	//	return false;
+	//}
+
+	//return view_proj_frustum.intersects_aabb(aabb);
 }
 
 } // namespace Models

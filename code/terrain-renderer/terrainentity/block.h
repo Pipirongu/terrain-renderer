@@ -1,4 +1,5 @@
 #pragma once
+
 //------------------------------------------------------------------------------
 /**
     @class Models::Block
@@ -9,6 +10,7 @@
 */
 //------------------------------------------------------------------------------
 
+#include "math\float2.h"
 
 namespace Terrain
 {
@@ -16,7 +18,7 @@ namespace Terrain
 	{
 		size_t offset;
 		size_t count;
-		//Vector2 range;
+		Math::float2 range;
 	};
 
 } // namespace Models

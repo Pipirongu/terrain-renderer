@@ -6,17 +6,10 @@
 #include "terrainnode.h"
 #include "terrainnodeinstance.h"
 
-//#include "models/modelnode.h"
-//#include "models/nodes/transformnode.h"
-//#include "models/nodes/statenodeinstance.h"
-//#include "models/modelnodeinstance.h"
 #include "coregraphics/memoryvertexbufferloader.h"
 #include "coregraphics/vertexcomponent.h"
-//#include "coregraphics/shaderserver.h"
-//#include "coregraphics/vertexlayoutserver.h"
 #include "coregraphics/memoryindexbufferloader.h"
 #include "resources/resourceloader.h"
-//#include "coregraphics/renderdevice.h"
 
 using namespace CoreGraphics;
 using namespace Util;
@@ -70,6 +63,7 @@ void TerrainNode::LoadResources(bool sync)
 	//setup grid vbo/ibo
 	this->SetupVertexBuffer(this->size);
 	this->SetupIndexBuffer(this->size);
+	this->SetupBlockRanges(this->size);
 	//allocate a uniform buffer?
 	//uniform buffer alignment??
 }
@@ -499,6 +493,27 @@ void TerrainNode::SetupIndexBuffer(int size)
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	delete[] indices;
+}
+
+void TerrainNode::SetupBlockRanges(int size)
+{
+	// Used for frustum culling.
+	// The range is the number of vertices covered minus 1.
+	block.range = float2(size - 1.f, size - 1.f);
+
+	vertical.range = float2(2.f, size - 1.f);
+	horizontal.range = float2(size - 1.f, 2.f);
+
+	trim_full.range = float2(2.f * size, 2.f * size);
+	trim_top_left.range = float2(2.f * size, 2.f * size);
+	trim_bottom_right.range = float2(2.f * size, 2.f * size);
+	trim_top_right.range = float2(2.f * size, 2.f * size);
+	trim_bottom_left.range = float2(2.f * size, 2.f * size);
+
+	degenerate_left.range = float2(0.f, 4.f * size - 2.f);
+	degenerate_right.range = float2(0.f, 4.f * size - 2.f);
+	degenerate_top.range = float2(4.f * size - 2.f, 0.f);
+	degenerate_bottom.range = float2(4.f * size - 2.f, 0.f);
 }
 
 } // namespace Models

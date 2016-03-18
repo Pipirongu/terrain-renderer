@@ -28,6 +28,8 @@ using namespace BaseGameFeature;
 using namespace GraphicsFeature;
 using namespace Util;
 using namespace Math;
+using namespace Input;
+
 
 //------------------------------------------------------------------------------
 /**
@@ -53,6 +55,17 @@ TerrainRendererGameState::OnStateEnter(const Util::String& prevState)
 {
 	GameStateHandler::OnStateEnter(prevState);	
 
+	//// setup the camera util object
+	//this->mayaCameraUtil.Setup(point(0.0f, 0.0f, 0.0f), point(200.0f, 10.f, 200.0f), vector(0.0f, 1.0f, 0.0f));
+	//this->mayaCameraUtil.Update();
+	//this->camera->SetTransform(this->mayaCameraUtil.GetCameraTransform());
+	//const Ptr<Graphics::CameraEntity>& camera = Graphics::GraphicsServer::Instance()->GetCurrentView()->GetCameraEntity();
+	//Math::matrix44 test;
+	//test.set_position(float4(0, 10, 0, 1));
+	//camera->SetTransform(test);
+	//const Math::frustum viewFrustum = camera->GetViewFrustum();
+	//viewFrustum.
+
 	this->stage = GraphicsFeature::GraphicsFeatureUnit::Instance()->GetDefaultStage();
 
 	const Ptr<UI::UiLayout>& layout = UI::UiFeatureUnit::Instance()->GetLayout("demo");
@@ -62,12 +75,6 @@ TerrainRendererGameState::OnStateEnter(const Util::String& prevState)
 	//////////////////////////////////////////////////////////////////////////
 	this->terrain_entity = Graphics::TerrainEntity::Create();
 	this->stage->AttachEntity(this->terrain_entity.cast<Graphics::GraphicsEntity>());
-
-	//setup terrainaddon
-	//this->terrain_renderer_addon = Terrain::TerrainRenderer::Create();
-	//this->terrain_entity = this->terrain_renderer_addon->CreateEntity();
-	//this->stage->AttachEntity(this->terrain_entity.cast<Graphics::GraphicsEntity>());
-	//this->terrain_renderer_addon->Setup(this->terrain_entity);
 }
 
 //------------------------------------------------------------------------------
@@ -130,9 +137,10 @@ TerrainRendererGameState::HandleInput()
 	{
 		this->terrain_entity->SetSurface("sur:geoclipmap_surfaces/wireframe");
 	}
-	if (kbd->KeyDown(Input::Key::X))
+	if (kbd->KeyDown(Input::Key::Escape))
 	{
 		TerrainRendererApplication::Instance()->RequestState("Exit");
 	}
 }
+
 } // namespace Tools

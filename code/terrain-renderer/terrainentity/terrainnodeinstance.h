@@ -37,15 +37,17 @@ public:
 
 	void update_level_offsets(const float2& camera_pos);
 
+	void UpdateShaderHandles();
+
 protected:
 	/// called when the node sets up
 	virtual void Setup(const Ptr<Models::ModelInstance>& inst, const Ptr<Models::ModelNode>& node, const Ptr<Models::ModelNodeInstance>& parentNodeInst);
 	/// called when removed
 	virtual void Discard();
 
-	IndexT bufferIndex;
-	// create buffer lock
-	Ptr<CoreGraphics::BufferLock> offsets_BufferLock;
+	int culled_counter;
+	bool IntersectsFrustum(const float2& offset, const float2& range, unsigned int level);
+
 	Ptr<CoreGraphics::ConstantBuffer> uniform_buffer;
 	Ptr<TerrainNode> terrain_node;
 	Ptr<Graphics::CameraEntity> camera;

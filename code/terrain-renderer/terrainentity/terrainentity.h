@@ -63,14 +63,8 @@ private:
 	
 	IndexT pickingId;
 	bool viewAligned;
-	//Resources::ResourceId resource;
-   // Math::float4 color;
     
 	Ptr<Models::ModelInstance> modelInstance;
-	//Ptr<Resources::ManagedTexture> texture;
-   // Ptr<Materials::SurfaceConstant> colorVariable;
-   // Ptr<Materials::SurfaceConstant> textureVariable;
-
 	Ptr<Models::Model> terrain_model;
 	Ptr<Terrain::TerrainNode> terrain_node;
 }; 

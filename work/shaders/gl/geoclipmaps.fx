@@ -14,21 +14,12 @@ sampler2D albedo_map;
 float height_map_size;
 float height_map_multiplier;
 
-// struct PerInstanceData
-// {
-	// vec2 offset; // World-space offset in XZ plane.
-	// float scale; // Scaling factor for vertex offsets (per-instance)
-	// float level; // lod-level to use when sampling heightmap
-	// //vec3 debug_color;
-// };
-
 #define HEIGHTMAP_MIN -20.0
 #define HEIGHTMAP_MAX 20.0
-#define INSTANCE_SIZE 500
+#define INSTANCE_SIZE 256
 
 shared varblock InstanceData[bool System = true;] // Use std140 packing rules for uniform block. set binding point to 0
 {
-	//PerInstanceData instance[256];
 	vec2 offset[INSTANCE_SIZE]; // World-space offset in XZ plane.
 	float scale[INSTANCE_SIZE]; // Scaling factor for vertex offsets (per-instance)
 	float level[INSTANCE_SIZE]; // lod-level to use when sampling heightmap
@@ -47,7 +38,6 @@ samplerstate HeightmapSampler
 samplerstate HeightmapSampler1
 {
 	Samplers = {albedo_map};
-	//Filter = Linear;
 	AddressU = Mirror;
 	AddressV = Mirror;
 };
@@ -76,7 +66,7 @@ vsGeoclipmap(in vec2 position, in float ginstanceID_offset , out float height_va
 	float level = level[int(ginstanceID_offset)];
 	vec2 uvcoord = pos/height_map_size; //send in the size of the heightmap
 	float height = textureLod(height_map, uvcoord, level).r;
-	//height = clamp(height, HEIGHTMAP_MIN, HEIGHTMAP_MAX);
+	height = clamp(height, HEIGHTMAP_MIN, HEIGHTMAP_MAX);
 	
 	
 	vec3 off = vec3(1.0, 1.0, 0.0);
@@ -109,7 +99,7 @@ vsGeoclipmap(in vec2 position, in float ginstanceID_offset , out float height_va
 */
 shader
 void
-psGeoclipmap(in float height_value, in vec2 terrain_uv, in float terrain_level, in vec4 normals, [color0] out vec4 color, [color1] out vec4 Normals) //in uvcoord to sample
+psGeoclipmap(in float height_value, in vec2 terrain_uv, in float terrain_level, in vec4 normals, [color0] out vec4 color, [color1] out vec4 Normals)
 {
 	vec3 color1 = textureLod(albedo_map, terrain_uv, terrain_level).rgb;
 	color = vec4(color1, 1);
