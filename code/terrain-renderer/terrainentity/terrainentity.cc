@@ -9,8 +9,6 @@
 #include "terrainnodeinstance.h"
 #include "models/nodes/statenodeinstance.h"
 #include "models/visresolver.h"
-#include "qttoolkit/contentbrowser/code/widgets/materials/mutablesurface.h"
-#include "renderutil/nodelookuputil.h"
 
 using namespace Resources;
 using namespace CoreGraphics;
@@ -30,10 +28,7 @@ __ImplementClass(Graphics::TerrainEntity, 'TENY', Graphics::GraphicsEntity);
 /**
 */
 TerrainEntity::TerrainEntity() :
-	//texture(0),
-    //color(1,1,1,1),
-	modelInstance(0),
-	viewAligned(false)
+	modelInstance(0)
 {
 	this->SetType(GraphicsEntityType::Model);
 }
@@ -62,18 +57,20 @@ TerrainEntity::OnActivate()
 	this->SetAlwaysVisible(true);
 	this->terrain_node->SetSurfaceName("sur:geoclipmap_surfaces/geoclipmap");
 	this->terrain_node->SetName("root");
+	// clipmap size
 	this->terrain_node->SetClipmapData(64, 10, 1.f);
 	this->terrain_node->LoadResources(true);
 	this->terrain_model->AttachNode(this->terrain_node.upcast<ModelNode>());
 	
 	// create model instance
 	this->modelInstance = this->terrain_model->CreateInstance();
-	//this->modelInstance->SetTransform(this->transform); //*****
 	this->modelInstance->SetPickingId(this->pickingId);
 
 	Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
 	const Ptr<SurfaceInstance>& surfaceInstance = nodeInstance->GetSurfaceInstance();
 
+
+	// extract the size of the height map
 	Ptr<Materials::SurfaceConstant> height_map_texture = surfaceInstance->GetConstant("height_map");
 	Ptr<CoreGraphics::Texture> textureObject = (CoreGraphics::Texture*)height_map_texture->GetValue().GetObject();
 
@@ -95,31 +92,21 @@ TerrainEntity::OnActivate()
 void 
 TerrainEntity::OnDeactivate()
 {
-	//n_assert(this->IsActive());
-	//n_assert(this->texture.isvalid());
-	//n_assert(this->modelInstance.isvalid());
-	//n_assert(this->textureVariable.isvalid());
+	n_assert(this->IsActive());
+	n_assert(this->modelInstance.isvalid());
 
-	//// cleanup resources
-	//ResourceManager* resManager = ResourceManager::Instance();
-	//resManager->DiscardManagedResource(this->texture.upcast<ManagedResource>());
+	// discard model instance
+	this->modelInstance->GetModel()->DiscardInstance(this->modelInstance);
+	this->modelInstance = 0;	
 
-	//// discard model instance
-	//this->modelInstance->GetModel()->DiscardInstance(this->modelInstance);
-	//this->modelInstance = 0;	
-
-	//// discard texture variable
- //   this->textureVariable = 0;
- //   this->colorVariable = 0;
-
-	//// kill model if this is our last billboard entity
-	//if (this->terrain_model->GetInstances().Size() == 0)
-	//{
-	//	this->terrain_node->UnloadResources();
-	//	this->terrain_node = 0;
-	//	this->terrain_model->Unload();
-	//	this->terrain_model = 0;
-	//}
+	// kill model if this is our last billboard entity
+	if (this->terrain_model->GetInstances().Size() == 0)
+	{
+		this->terrain_node->UnloadResources();
+		this->terrain_node = 0;
+		this->terrain_model->Unload();
+		this->terrain_model = 0;
+	}
 
 	// up to parent class
 	GraphicsEntity::OnDeactivate();
@@ -212,19 +199,6 @@ TerrainEntity::OnRenderBefore(IndexT frameIndex)
 
         GraphicsEntity::OnRenderBefore(frameIndex);
     }
-}
-
-void TerrainEntity::SetSurface(const Util::String& name)
-{
-	////this->terrain_node->SetSurfaceName(name);
-	Ptr<Materials::ManagedSurface> managedSurface = Resources::ResourceManager::Instance()->CreateManagedResource(Surface::RTTI, name, NULL, true).downcast<Materials::ManagedSurface>();
-	Ptr<Surface> mutableSurface = managedSurface->GetSurface();
-
-
-	const Ptr<SurfaceInstance> surfaceInstance = mutableSurface->CreateInstance();
-	Ptr<TerrainNodeInstance> nodeInstance = this->modelInstance->GetRootNodeInstance().downcast<TerrainNodeInstance>();
-	nodeInstance->SetSurfaceInstance(surfaceInstance);
-	nodeInstance->UpdateShaderHandles();
 }
 
 } // namespace Graphics

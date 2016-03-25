@@ -2,7 +2,7 @@
 
 //------------------------------------------------------------------------------
 /**
-    @class Models::Block
+    @class Terrain::Block
     
 	A block for clipmap grid
     
@@ -10,15 +10,12 @@
 */
 //------------------------------------------------------------------------------
 
-#include "math\float2.h"
-
 namespace Terrain
 {
 	struct Block
 	{
-		size_t offset;
-		size_t count;
-		Math::float2 range;
+		int offset;
+		int count;
 	};
 
 } // namespace Models

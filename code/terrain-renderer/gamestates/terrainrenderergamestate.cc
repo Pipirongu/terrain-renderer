@@ -55,24 +55,14 @@ TerrainRendererGameState::OnStateEnter(const Util::String& prevState)
 {
 	GameStateHandler::OnStateEnter(prevState);	
 
-	//// setup the camera util object
-	//this->mayaCameraUtil.Setup(point(0.0f, 0.0f, 0.0f), point(200.0f, 10.f, 200.0f), vector(0.0f, 1.0f, 0.0f));
-	//this->mayaCameraUtil.Update();
-	//this->camera->SetTransform(this->mayaCameraUtil.GetCameraTransform());
-	//const Ptr<Graphics::CameraEntity>& camera = Graphics::GraphicsServer::Instance()->GetCurrentView()->GetCameraEntity();
-	//Math::matrix44 test;
-	//test.set_position(float4(0, 10, 0, 1));
-	//camera->SetTransform(test);
-	//const Math::frustum viewFrustum = camera->GetViewFrustum();
-	//viewFrustum.
-
+	// get stage
 	this->stage = GraphicsFeature::GraphicsFeatureUnit::Instance()->GetDefaultStage();
 
 	const Ptr<UI::UiLayout>& layout = UI::UiFeatureUnit::Instance()->GetLayout("demo");
 	Ptr<UI::UiElement> element = layout->GetElement("updatetext");
 	element->SetText("Entered state");
 
-	//////////////////////////////////////////////////////////////////////////
+	// attach terrain to stage
 	this->terrain_entity = Graphics::TerrainEntity::Create();
 	this->stage->AttachEntity(this->terrain_entity.cast<Graphics::GraphicsEntity>());
 }
@@ -131,11 +121,11 @@ TerrainRendererGameState::HandleInput()
 	// reload layout if key gets pressed
 	if (kbd->KeyDown(Input::Key::F1))
 	{
-		this->terrain_entity->SetSurface("sur:geoclipmap_surfaces/geoclipmap");
+		//this->terrain_entity->SetSurface("sur:geoclipmap_surfaces/geoclipmap");
 	}
 	if (kbd->KeyDown(Input::Key::F2))
 	{
-		this->terrain_entity->SetSurface("sur:geoclipmap_surfaces/wireframe");
+		//this->terrain_entity->SetSurface("sur:geoclipmap_surfaces/wireframe");
 	}
 	if (kbd->KeyDown(Input::Key::Escape))
 	{

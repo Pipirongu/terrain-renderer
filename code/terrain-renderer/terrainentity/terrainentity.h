@@ -10,7 +10,6 @@
 //------------------------------------------------------------------------------
 #include "graphics/graphicsentity.h"
 #include "coregraphics/shaderinstance.h"
-#include "resources/managedtexture.h"
 #include "resources/resourceid.h"
 #include "models/model.h"
 #include "terrainnode.h"
@@ -33,22 +32,15 @@ public:
 	/// deactivate entity
 	void OnDeactivate();
 
-	/// hide billboard
+	/// hide
 	void OnHide();
-	/// show billboard
+	/// show
 	void OnShow();
-
-	/// sets billboard to be view aligned
-	void SetViewAligned(bool b);
-	/// gets billboard flag
-	const bool GetViewAligned() const;
 
 	/// set picking id of model entity
 	void SetPickingId(IndexT i);
 	/// get picking id of model entity
 	const IndexT GetPickingId() const;
-
-	void SetSurface(const Util::String& name);
 
 private:
 
@@ -62,30 +54,11 @@ private:
 	void OnRenderBefore(IndexT frameIndex);
 	
 	IndexT pickingId;
-	bool viewAligned;
     
 	Ptr<Models::ModelInstance> modelInstance;
 	Ptr<Models::Model> terrain_model;
 	Ptr<Terrain::TerrainNode> terrain_node;
 }; 
-
-//------------------------------------------------------------------------------
-/**
-*/
-inline void 
-TerrainEntity::SetViewAligned(bool b)
-{
-	this->viewAligned = b;
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
-inline const bool 
-TerrainEntity::GetViewAligned() const
-{
-	return this->viewAligned;
-}
 
 //------------------------------------------------------------------------------
 /**

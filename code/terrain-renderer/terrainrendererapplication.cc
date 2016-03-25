@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//  demogameapplication.cc
+//  terrainrendererapplication.cc
 //  (C) 2011-2015 Individual contributors, see AUTHORS file
 //------------------------------------------------------------------------------
 #include "stdneb.h"
@@ -77,7 +77,7 @@ TerrainRendererApplication::SetupStateHandlers()
 	Ptr<TerrainRendererGameState> gameState = TerrainRendererGameState::Create();
 	gameState->SetSetupMode(TerrainRendererGameState::NewGame);
 	gameState->SetName("DemoState");
-	// select the level to be loaded explicitly instead of the default one
+	// an empty level with maya camera for terrain demo
 	gameState->SetLevelName("terrainlevel");
 
 	this->AddStateHandler(gameState.get());

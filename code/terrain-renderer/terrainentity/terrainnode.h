@@ -1,10 +1,10 @@
 #pragma once
 //------------------------------------------------------------------------------
 /**
-    @class Models::TerrainNode
+    @class Terrain::TerrainNode
     
-     representation of a billboard shape. 
-	Is basically a shape node but without a mesh load from file.
+	has the buffers, surface for the terrain.
+	the buffers contain data for the terrain grid and won't be modified once set!
     
     (C) 2013-2015 Individual contributors, see AUTHORS file
 */
@@ -31,12 +31,14 @@ public:
 
 	/// create a model node instance
 	virtual Ptr<Models::ModelNodeInstance> CreateNodeInstance() const;
-
+	/// setup buffers with grid data
 	void LoadResources(bool sync);
+	/// called when resources should be unloaded
+	void UnloadResources();
     /// set material name
     void SetSurfaceName(const Util::String& name);
 	
-	// Sets the size of clipmap blocks, MxM vertices per block. Should be power-of-two. M is based on N. A clipmap level is (4M-1) * (4M-1) grid.
+	// Sets the size of clipmap blocks, MxM vertices per block. M is based on N. A clipmap level is (4M-1) * (4M-1) grid.
 	void SetClipmapData(int size, int levels, float scale);
 
 
@@ -45,11 +47,11 @@ public:
 	int levels;
 	float clipmap_scale;
 
-	size_t num_indices;
+	int num_indices;
 
 	Ptr<CoreGraphics::VertexBuffer> vbo;
 	Ptr<CoreGraphics::IndexBuffer> ibo;
-	Ptr<CoreGraphics::VertexBuffer> offset_buffer;
+	Ptr<CoreGraphics::VertexBuffer> instance_offset_buffer;
 	Ptr<CoreGraphics::VertexLayout> vertexLayout;
 	void* mapped_offsets;
 
@@ -69,9 +71,10 @@ public:
 	Block degenerate_bottom;
 
 private:
+	/// setup vertex buffer and instance offset buffer
 	void SetupVertexBuffer(int size);
+	/// setup index buffer
 	void SetupIndexBuffer(int size);
-	void SetupBlockRanges(int size);
 }; 
 
 } // namespace Models

@@ -15,9 +15,9 @@
 
 //------------------------------------------------------------------------------
 /**
-    @class Tools::DemoProjectApplication
+    @class Tools::TerrainRendererApplication
     
-    NebulaT demo project application.
+    terrain demo project with a terrain entity attached
 
     (C) 2011-2013 Individual contributors, see AUTHORS file
 */

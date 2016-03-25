@@ -1,6 +1,5 @@
 //------------------------------------------------------------------------------
 //  geoclipmaps.fx
-//  (C) 2013 Gustav Sterbrant
 //------------------------------------------------------------------------------
 
 #include "lib/std.fxh"
@@ -14,15 +13,13 @@ sampler2D albedo_map;
 float height_map_size;
 float height_map_multiplier;
 
-#define HEIGHTMAP_MIN -20.0
-#define HEIGHTMAP_MAX 20.0
 #define INSTANCE_SIZE 256
 
-shared varblock InstanceData[bool System = true;] // Use std140 packing rules for uniform block. set binding point to 0
+shared varblock InstanceData[bool System = true;]
 {
-	vec2 offset[INSTANCE_SIZE]; // World-space offset in XZ plane.
-	float scale[INSTANCE_SIZE]; // Scaling factor for vertex offsets (per-instance)
-	float level[INSTANCE_SIZE]; // lod-level to use when sampling heightmap
+	vec2 offset[INSTANCE_SIZE];
+	float scale[INSTANCE_SIZE];
+	float level[INSTANCE_SIZE];
 };
 
 
@@ -35,11 +32,11 @@ samplerstate HeightmapSampler
 	AddressV = Wrap;
 };
 
-samplerstate HeightmapSampler1
+samplerstate TextureSampler
 {
 	Samplers = {albedo_map};
-	AddressU = Mirror;
-	AddressV = Mirror;
+	AddressU = Wrap;
+	AddressV = Wrap;
 };
 
 state GeoclipState
@@ -58,16 +55,15 @@ state WireframeState
 */
 shader
 void
-vsGeoclipmap(in vec2 position, in float ginstanceID_offset , out float height_value, out vec2 terrain_uv, out float terrain_level, out vec4 normals) //[slot=2]
+vsGeoclipmap(in vec2 position, in float ginstanceID_offset , out float height_value, out vec2 terrain_uv, out float terrain_level, out vec4 normals)
 {
 	vec2 local_offset = position * scale[int(ginstanceID_offset)];
 	vec2 pos = offset[int(ginstanceID_offset)] + local_offset;
 	
 	float level = level[int(ginstanceID_offset)];
+	
 	vec2 uvcoord = pos/height_map_size; //send in the size of the heightmap
 	float height = textureLod(height_map, uvcoord, level).r;
-	height = clamp(height, HEIGHTMAP_MIN, HEIGHTMAP_MAX);
-	
 	
 	vec3 off = vec3(1.0, 1.0, 0.0);
 	float hL =  textureLod(height_map, (pos - off.xz)/height_map_size, level).r;

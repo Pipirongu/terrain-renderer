@@ -1,9 +1,9 @@
 #pragma once
 //------------------------------------------------------------------------------
 /**
-    @class Tools::DemoGameState
+    @class Tools::TerrainRendererGameState
     
-    A basic game state
+    gamestate where a terrain is attached
     
     (C) 2013-2014 Individual contributors, see AUTHORS file
 */
