@@ -58,7 +58,7 @@ TerrainEntity::OnActivate()
 	this->terrain_node->SetSurfaceName("sur:geoclipmap_surfaces/geoclipmap");
 	this->terrain_node->SetName("root");
 	// clipmap size
-	this->terrain_node->SetClipmapData(64, 10, 1.f);
+	this->terrain_node->SetClipmapData(16, 10, 1.f);
 	this->terrain_node->LoadResources(true);
 	this->terrain_model->AttachNode(this->terrain_node.upcast<ModelNode>());
 	

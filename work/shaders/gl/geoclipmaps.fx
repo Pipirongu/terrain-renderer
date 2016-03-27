@@ -27,7 +27,7 @@ shared varblock InstanceData[bool System = true;]
 samplerstate HeightmapSampler
 {
 	Samplers = {height_map};
-	Filter = Linear;
+	//Filter = Linear;
 	AddressU = Wrap;
 	AddressV = Wrap;
 };
@@ -61,8 +61,7 @@ vsGeoclipmap(in vec2 position, in float ginstanceID_offset , out float height_va
 	vec2 pos = offset[int(ginstanceID_offset)] + local_offset;
 	
 	float level = level[int(ginstanceID_offset)];
-	
-	vec2 uvcoord = pos/height_map_size; //send in the size of the heightmap
+	vec2 uvcoord = ((pos/height_map_size) * 0.2)+0.5;;
 	float height = textureLod(height_map, uvcoord, level).r;
 	
 	vec3 off = vec3(1.0, 1.0, 0.0);

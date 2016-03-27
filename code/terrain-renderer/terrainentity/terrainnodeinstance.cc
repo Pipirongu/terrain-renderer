@@ -20,6 +20,7 @@
 #include "graphics/cameraentity.h"
 #include "coregraphics/base/vertexcomponentbase.h"
 #include "coregraphics/transformdevice.h"
+#include "materials/surfaceinstance.h"
 
 using namespace CoreGraphics;
 using namespace Util;
@@ -89,7 +90,6 @@ TerrainNodeInstance::Render()
 
 	this->UpdateCameraOffsets(camera_pos);
 	this->UpdateDrawList();
-
 
 	//bind vao, ibo
 	renderDevice->SetStreamVertexBuffer(0, this->terrain_node->vbo, 0);
@@ -400,7 +400,6 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::GenerateInstanceDataBlocks(Ut
 			instance.level = 0;
 			instance.offset = this->level_offsets[0];
 			instance.offset = instance.offset + float2::multiply(float2((float)x, (float)z), float2((float)(this->terrain_node->size - 1), (float)(this->terrain_node->size - 1)));
-
 			instance.offset = float2::multiply(instance.offset, float2(this->terrain_node->clipmap_scale, this->terrain_node->clipmap_scale));
 
 			if (this->IntersectsFrustum(instance.offset, 0))
@@ -436,13 +435,6 @@ TerrainNodeInstance::DrawInfo TerrainNodeInstance::GenerateInstanceDataBlocks(Ut
 					instance.offset.x() += 2 << i;
 				if (z >= 2)
 					instance.offset.y() += 2 << i;
-
-
-				// rounds the value downwards to an integer that is not larger than the original
-				float2 power_of_two((float)(1 << i), (float)(1 << i));
-				float2 instance_offset_temp;
-				instance_offset_temp.x() = instance.offset.x() / power_of_two.x();
-				instance_offset_temp.y() = instance.offset.y() / power_of_two.y();
 
 				instance.offset = float2::multiply(instance.offset, float2(this->terrain_node->clipmap_scale, this->terrain_node->clipmap_scale));
 

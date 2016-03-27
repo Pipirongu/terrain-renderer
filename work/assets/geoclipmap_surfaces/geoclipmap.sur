@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <NebulaT>
     <Surface template="Geoclipmap">
-        <Param name="height_map" value="tex:geoclipmap_heightmaps/gcanyon_height" />
-        <Param name="albedo_map" value="tex:geoclipmap_textures/gcanyon_color_4k2k" />
+        <Param name="height_map" value="tex:geoclipmap_heightmaps/heightmap" />
+        <Param name="albedo_map" value="tex:geoclipmap_textures/geoclipmap_texture" />
         <Param name="height_map_size" value="1024.000000" />
         <Param name="height_map_multiplier" value="10.000000" />
     </Surface>
